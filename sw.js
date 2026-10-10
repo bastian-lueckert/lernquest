@@ -1,6 +1,6 @@
-const CACHE = 'lernquest-v1';
+const CACHE = 'lernquest-v2';
 const FILES = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icon.svg',
-  'data/content.js', 'data/mathe.js', 'data/deutsch.js', 'data/englisch.js', 'data/naturwissenschaften.js'];
+  'data/content.js', 'data/mathe.js', 'data/deutsch.js', 'data/englisch.js', 'data/naturwissenschaften.js', 'data/mathe2.js', 'data/deutsch2.js', 'data/englisch2.js', 'data/nw2.js', 'data/gesellschaft.js', 'data/technik-sprachen.js', 'data/kreativ.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

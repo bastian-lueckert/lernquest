@@ -30,6 +30,7 @@ Neue Dateien in `index.html` und in die Liste `FILES` in `sw.js` eintragen. Bei 
 
 ## Stand und Grenzen
 
-- Prototyp mit 13 Themen / 77 Fragen in Mathe, Deutsch, Englisch, Biologie, Physik. Die übrigen Fächer sind als „bald verfügbar“ angelegt.
-- Die Zuordnung zu Klassenstufen ist exemplarisch und sollte gegen den aktuellen Kernlehrplan NRW (G9) geprüft werden.
+- 15 Fächer, 116 Themen, rund 600 Fragen (Mathematik, Deutsch, Englisch, Biologie, Physik, Chemie, Geschichte, Erdkunde, Informatik, Politik, Französisch, Latein, Musik, Kunst, Religion/Ethik). Je Klasse und Fach gibt es 1–4 Themen; der Lehrplan ist damit **nicht vollständig** abgedeckt, sondern exemplarisch und gut erweiterbar.
+- Nicht alle Fächer laufen durch alle Klassen (z. B. Physik/Chemie ab Klasse 7, Musik/Kunst bis Klasse 8, Politik ab 7). Die Zuordnung wurde nicht gegen den aktuellen Kernlehrplan NRW (G9) geprüft.
+- Die Inhalte wurden KI-gestützt erstellt und nicht von Lehrkräften geprüft. Vor dem Einsatz bitte stichprobenartig fachlich gegenlesen.
 - Online-Rangliste und Konten brauchen später ein Backend (z. B. Supabase/Firebase). Die Challenge-Links funktionieren bewusst ohne.
