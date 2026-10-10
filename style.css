@@ -151,3 +151,37 @@ code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:.85rem}
   .vocab tr{break-inside:avoid}
   :root{--ink:#000;--mute:#444;--line:#ccc;--card:#fff;--bg:#fff}
 }
+
+/* ---- Zahlentastatur ---- */
+.numrow{display:flex;gap:8px;align-items:center}
+.numrow input{font-size:1.4rem;max-width:260px;text-align:right}
+.keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;max-width:340px}
+.key{font:700 1.4rem system-ui;min-height:54px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);touch-action:manipulation}
+.key:active{transform:scale(.94);background:var(--line)}
+.key.op{background:var(--card);color:var(--pri);border-color:var(--pri)}
+.key.ctl{color:var(--bad);font-size:1.2rem}
+.key.ok{background:var(--good);border-color:var(--good);color:#fff}
+
+/* ---- Quest-Modus ---- */
+.questcard{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:2px solid var(--pri);background:linear-gradient(135deg,rgba(79,70,229,.12),rgba(124,58,237,.12))}
+.questcard .ic{font-size:1.9rem}.questcard small{display:block}
+.fight{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:10px}
+.mon{display:flex;gap:10px;align-items:center;flex:1}.mon>div{flex:1}.mon-ic{font-size:2.2rem}
+.hero{text-align:center}.hero-ic{font-size:1.8rem;display:block}.hearts{font-size:.9rem;letter-spacing:1px}
+.bar.hp{height:10px;background:var(--line)}.bar.hp i{background:linear-gradient(90deg,#d64545,#f08c00)}
+.story{line-height:1.55;margin-top:10px;text-align:left}
+.story-card{text-align:center}.story-card .story{text-align:left}
+.story-end{margin-top:12px;border-color:var(--gold)}
+.quest-res.won{border-color:var(--good)}.quest-res.lost{border-color:var(--bad)}
+.hero-card{display:flex;gap:12px;align-items:center}.hero-card>div{flex:1}.hero-card small{display:block}.hero-big{font-size:2.4rem}
+.path{display:grid;gap:10px;margin-top:6px}
+.node{display:flex;gap:12px;align-items:center}.node>div{flex:1}.node small{display:block}
+.node-ic{font-size:2rem;width:46px;text-align:center}
+.node.done{border-color:var(--good)}.node.cur{border:2px solid var(--pri);box-shadow:0 0 0 4px rgba(79,70,229,.15)}.node.locked{opacity:.55}
+.ok-t{color:var(--good)}
+.lbl{display:grid;gap:4px;margin-top:10px;font-weight:600}.lbl input{font:inherit}
+.heropick{display:flex;gap:8px;flex-wrap:wrap}.heropick label{cursor:pointer}.heropick input{position:absolute;opacity:0;width:1px;height:1px}
+.heropick span{display:grid;place-items:center;width:56px;height:56px;font-size:2rem;border-radius:16px;border:2px solid var(--line);background:var(--bg)}
+.heropick input:checked+span{border-color:var(--pri);background:rgba(79,70,229,.15)}
+.heropick input:focus-visible+span{outline:3px solid var(--pri)}
+.numform{display:block}

@@ -24,7 +24,7 @@
   const nQ = (s, g) => topicsFor(s, g).reduce((a, t) => a + t.qs.length, 0);
 
   /* ---------- Speicher ---------- */
-  const defaults = () => ({ name: '', grade: 0, xp: 0, streak: 0, bestStreak: 0, lastDay: '', quizzes: 0, correct: 0, answered: 0, perfect: 0, duels: 0, wins: 0, tests: [], genCorrect: 0, best: {}, wrong: {}, badges: {}, friends: {}, played: {}, stats: {}, custom: [], daily: { day: '', n: 0 } });
+  const defaults = () => ({ name: '', grade: 0, xp: 0, streak: 0, bestStreak: 0, lastDay: '', quizzes: 0, correct: 0, answered: 0, perfect: 0, duels: 0, wins: 0, tests: [], genCorrect: 0, best: {}, wrong: {}, badges: {}, friends: {}, played: {}, stats: {}, custom: [], quest: {}, daily: { day: '', n: 0 } });
   const load = () => { try { return Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { return defaults(); } };
   let S = load();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* privater Modus */ } };
@@ -60,7 +60,9 @@
     { id: 'lvl5', icon: '⭐', name: 'Level 5', desc: 'Erreiche Level 5.', ok: s => levelOf(s.xp) >= 5 },
     { id: 'test', icon: '📝', name: 'Prüfungsprofi', desc: 'Schließe einen Probetest ab.', ok: s => s.tests.length >= 1 },
     { id: 'note1', icon: '🥇', name: 'Einserkandidat', desc: 'Erreiche im Probetest mindestens Note 2.', ok: s => s.tests.some(t => t.note <= 2) },
-    { id: 'rechner', icon: '🧮', name: 'Kopfrechner', desc: 'Löse 25 Rechenaufgaben richtig.', ok: s => s.genCorrect >= 25 }
+    { id: 'rechner', icon: '🧮', name: 'Kopfrechner', desc: 'Löse 25 Rechenaufgaben richtig.', ok: s => s.genCorrect >= 25 },
+    { id: 'quest1', icon: '🗡️', name: 'Erster Sieg', desc: 'Besiege deinen ersten Quest-Gegner.', ok: s => Object.values(s.quest).some(q => Object.keys(q.done).length >= 1) },
+    { id: 'questall', icon: '👑', name: 'Held von Edukia', desc: 'Schließe eine komplette Klassen-Quest ab.', ok: s => Object.values(s.quest).some(q => q.done.boss != null) }
   ];
   const NOTEN = ['', 'sehr gut', 'gut', 'befriedigend', 'ausreichend', 'mangelhaft', 'ungenügend'];
   const noteOf = pct => pct >= 92 ? 1 : pct >= 81 ? 2 : pct >= 67 ? 3 : pct >= 50 ? 4 : pct >= 30 ? 5 : 6;
@@ -69,7 +71,7 @@
   const view = { screen: 'home', subject: null, challenge: null, sheet: null, edit: null, testcfg: null };
   let sess = null;
   const go = (screen, extra) => { Object.assign(view, { screen }, extra); render(); window.scrollTo(0, 0); };
-  const TAB = { home: 'home', subject: 'home', sheet: 'home', editor: 'home', editform: 'home', testsetup: 'tests', rewards: 'rewards', report: 'report', friends: 'friends', challenge: 'friends', result: 'home' };
+  const TAB = { home: 'home', subject: 'home', sheet: 'home', editor: 'home', editform: 'home', testsetup: 'tests', rewards: 'rewards', report: 'report', friends: 'friends', challenge: 'friends', result: 'home', questmap: 'home', questhero: 'home', questprolog: 'home', questlevel: 'home' };
 
   /* ---------- Items & Sitzungen ---------- */
   const mcItem = (q, r, review) => ({ kind: 'mc', q, review, opts: shuffle([{ t: q.a, ok: true }, ...q.w.map(t => ({ t, ok: false }))], r) });
@@ -118,6 +120,36 @@
     go('quiz');
   }
 
+  /* ---------- Quest-Modus ---------- */
+  const Q = L.quest;
+  const questLevels = g => L.subjects.filter(s => s.id !== 'eigene' && (nQ(s.id, g) || gensFor(s.id, g).length)).map(s => ({ id: s.id, subject: s })).concat([{ id: 'boss', boss: true }]);
+  const questDone = (g, id) => !!(S.quest[g] && S.quest[g].done[id] != null);
+  const questIdx = g => { const lv = questLevels(g), i = lv.findIndex(l => !questDone(g, l.id)); return i < 0 ? lv.length : i; };
+  const encOf = (g, lv) => lv.boss ? [Q.arcs[g].world, Q.arcs[g].villain, Q.arcs[g].vemoji, Q.arcs[g].bossIntro, Q.arcs[g].bossWin, Q.arcs[g].bossLose, 'Das Licht der Weisheit'] : (Q.enc[lv.id] || ['Ein fremder Ort', 'Ein Gegner', '👾', 'Ein Gegner stellt sich dir in den Weg.', 'Du hast gewonnen!', 'Du musst noch üben.', 'Wissenskristall']);
+  const story = (g, s) => String(s).replace(/\{name\}/g, S.quest[g].hero.name).replace(/\{mentor\}/g, Q.arcs[g].mentor);
+
+  function startQuest(g, idx) {
+    const lv = questLevels(g)[idx];
+    if (!lv) return;
+    const boss = !!lv.boss, want = boss ? 15 : 10, ratio = boss ? 0.8 : 0.7;
+    const mcPool = boss ? L.subjects.filter(s => s.id !== 'eigene').flatMap(s => topicsFor(s.id, g).flatMap(t => t.qs)) : topicsFor(lv.id, g).flatMap(t => t.qs);
+    const gens = shuffle(boss ? (L.gens || []).filter(x => x.grade === g) : gensFor(lv.id, g));
+    const nNum = gens.length ? 3 : 0;
+    const mc = shuffle(mcPool).slice(0, want - nNum).map(q => mcItem(q, Math.random, false));
+    const nums = Array.from({ length: Math.max(0, Math.min(want - mc.length, gens.length ? want : 0)) }, (_, i) => numItem(gens[i % gens.length]));
+    const items = shuffle(mc.concat(nums));
+    if (!items.length) return;
+    const n = items.length, need = Math.ceil(n * ratio);
+    const e = encOf(g, lv);
+    sess = { mode: 'quest', quest: { g, idx, id: lv.id, need, n, boss }, topic: null, title: (boss ? 'Endkampf: ' : 'Kampf: ') + e[1], items, i: 0, correct: 0, picked: null, seed: null, ch: null, log: [] };
+    go('quiz');
+  }
+  function questPanel() {
+    const qs = sess.quest, g = qs.g, wrong = sess.log.length - sess.correct, maxLives = qs.n - qs.need + 1, lives = Math.max(0, maxLives - wrong);
+    const e = encOf(g, { id: qs.id, boss: qs.boss }), hp = Math.max(0, 100 - Math.round(sess.correct / qs.need * 100));
+    return `<div class="fight"><div class="mon"><span class="mon-ic">${e[2]}</span><div><b>${esc(e[1])}</b><div class="bar hp"><i style="width:${hp}%"></i></div><small>Noch ${Math.max(0, qs.need - sess.correct)} Treffer nötig</small></div></div><div class="hero"><span class="hero-ic">${S.quest[g].hero.emoji}</span><span class="hearts" aria-label="${lives} Leben">${'❤️'.repeat(lives)}${'🖤'.repeat(maxLives - lives)}</span></div></div>`;
+  }
+
   /* ---------- Antworten ---------- */
   function bump(it, ok) {
     const k = keyOf(it), s = S.stats[k] || (S.stats[k] = { a: 0, c: 0 });
@@ -162,11 +194,13 @@
   function next() {
     if (!sess || sess.picked == null) return;
     sess.picked = null;
-    if (++sess.i >= sess.items.length) finish(); else { render(); const inp = $app.querySelector('input[name=a]'); if (inp) inp.focus({ preventScroll: true }); }
+    const fightOver = sess.mode === 'quest' && (sess.correct >= sess.quest.need || (sess.log.length - sess.correct) > sess.quest.n - sess.quest.need);
+    if (fightOver || ++sess.i >= sess.items.length) finish(); else { render(); const inp = $app.querySelector('input[name=a]'); if (inp) inp.focus({ preventScroll: true }); }
   }
 
   function finish() {
-    const n = sess.items.length, c = sess.correct, perfect = c === n;
+    const isQuest = sess.mode === 'quest';
+    const n = isQuest ? sess.log.length : sess.items.length, c = sess.correct, perfect = c === n && !isQuest;
     const lvBefore = levelOf(S.xp);
     let xp = c * (sess.mode === 'test' ? 5 : 10) + (perfect && sess.mode !== 'test' ? 25 : 0);
     const t = today();
@@ -198,11 +232,22 @@
       test = { pct, note, cats, secs: Math.round((Date.now() - sess.t0) / 1000) };
       S.tests.push({ d: t, subject: sess.cfg.subject, grade: sess.cfg.grade, pct, note, n });
     }
+    let quest = null;
+    if (isQuest) {
+      const qs = sess.quest, win = c >= qs.need, st = S.quest[qs.g];
+      if (!qs.boss) S.played[qs.id] = 1;
+      if (win) {
+        const first = st.done[qs.id] == null;
+        st.done[qs.id] = Math.max(st.done[qs.id] || 0, Math.round(c / qs.n * 100));
+        if (first) xp += qs.boss ? 60 : 30;
+      }
+      quest = Object.assign({ win, c, n }, qs);
+    }
     S.xp += xp;
     const fresh = BADGES.filter(b => !S.badges[b.id] && b.ok(S));
     fresh.forEach(b => S.badges[b.id] = t);
     save();
-    sess.result = { xp, perfect, duel, fresh, test, levelUp: levelOf(S.xp) > lvBefore };
+    sess.result = { xp, perfect, duel, fresh, test, quest, levelUp: levelOf(S.xp) > lvBefore };
     go('result');
   }
 
@@ -272,6 +317,7 @@
     const subs = L.subjects.filter(s => topicsFor(s.id, g).length || gensFor(s.id, g).length);
     return `${header()}${gradeChips()}
       <section class="card goal"><div class="row"><b>Tagesziel</b><span>${Math.min(dn, DAILY_GOAL)} / ${DAILY_GOAL} richtige Antworten ${dn >= DAILY_GOAL ? '✅' : ''}</span></div><div class="bar big"><i style="width:${dp}%"></i></div></section>
+      ${(() => { const st = S.quest[g], arc = Q.arcs[g], tot = questLevels(g).length, cur = questIdx(g); return `<button class="card questcard" data-act="quest"><span class="ic">🗺️</span><span><b>Quest-Modus: ${esc(arc.world)}</b><small>${!st ? 'Starte dein Abenteuer durch alle Fächer von Klasse ' + g + '!' : cur >= tot ? '🏆 Quest abgeschlossen – nochmal spielen?' : 'Weiter mit Level ' + (cur + 1) + ' von ' + tot + ' – ' + esc(st.hero.name) + ' ' + st.hero.emoji}</small></span></button>`; })()}
       ${wrongN ? `<button class="card review" data-act="review"><span class="ic">🔁</span><span><b>Wiederholen</b><small>${wrongN} Frage${wrongN > 1 ? 'n' : ''}, die du noch festigen kannst</small></span></button>` : ''}
       <h2>Deine Fächer in Klasse ${g}</h2>
       <div class="grid">${subs.map(s => {
@@ -296,10 +342,44 @@
       }).join('') : '<div class="card empty">Hier gibt es für diese Klasse noch keine Themen. 🚧</div>'}`;
   }
 
+  /* --- Quest-Ansichten --- */
+  function viewQuestMap() {
+    const g = S.grade, st = S.quest[g], arc = Q.arcs[g], lv = questLevels(g), cur = questIdx(g), done = cur >= lv.length;
+    const crystals = lv.filter(l => !l.boss && questDone(g, l.id)).length;
+    return `${header()}<div class="bar-top no-print"><button class="back" data-act="home" aria-label="Zurück">←</button><h2>🗺️ ${esc(arc.world)}</h2></div>
+      <section class="card hero-card"><span class="hero-big">${st.hero.emoji}</span><div><b>${esc(st.hero.name)}</b><small>Klasse ${g} · 🔷 ${crystals} von ${lv.length - 1} Kristallen${done ? ' · 🏆 Quest geschafft' : ''}</small></div><button class="btn ghost" data-act="questprolog">📖 Story</button></section>
+      ${done ? `<section class="card story-end"><b>🎉 Quest abgeschlossen!</b><p class="story">${esc(story(g, arc.epilogue))}</p></section>` : ''}
+      <div class="path">${lv.map((l, i) => {
+        const e = encOf(g, l), isDone = questDone(g, l.id), isCur = i === cur, locked = i > cur;
+        return `<article class="card node ${isDone ? 'done' : isCur ? 'cur' : 'locked'}"><span class="node-ic">${locked ? '🔒' : e[2]}</span><div><b>${l.boss ? '⚔️ Endkampf: ' : ''}${esc(locked && l.boss ? 'Der Endkampf wartet …' : e[0])}</b><small>${locked ? 'Besiege zuerst den vorherigen Gegner' : esc(e[1]) + (l.boss ? '' : ' · ' + esc(l.subject.name))}</small>${isDone ? `<small class="ok-t">✅ Bestleistung ${st.done[l.id]} %</small>` : ''}</div>${locked ? '' : `<button class="btn ${isCur ? '' : 'ghost'}" data-act="questgo" data-i="${i}">${isDone ? 'Erneut' : 'Kämpfen'}</button>`}</article>`;
+      }).join('')}</div>
+      <div class="btns no-print" style="margin-top:14px"><button class="btn ghost" data-act="questreset">Quest neu starten</button></div>`;
+  }
+  function viewQuestHero() {
+    const g = S.grade, arc = Q.arcs[g];
+    return `<div class="bar-top no-print"><button class="back" data-act="home" aria-label="Zurück">←</button><h2>🗺️ ${esc(arc.world)}</h2></div>
+      <form class="card" data-form="hero"><h3>Wer bist du, Held:in?</h3>
+        <label class="lbl">Dein Name<input name="n" maxlength="20" required value="${esc(S.name)}" placeholder="z. B. Mia"></label>
+        <p class="lbl">Wähle deinen Charakter</p><div class="heropick">${Q.heroes.map((h, i) => `<label><input type="radio" name="e" value="${h}" ${i === 0 ? 'checked' : ''}><span>${h}</span></label>`).join('')}</div>
+        <div class="btns" style="margin-top:14px"><button class="btn">Abenteuer beginnen →</button></div></form>`;
+  }
+  function viewQuestProlog() {
+    const g = S.grade, arc = Q.arcs[g];
+    return `<section class="card story-card"><div class="big-ic">${arc.vemoji}</div><h2>${esc(arc.world)}</h2>${arc.prologue.map(p => `<p class="story">${esc(story(g, p))}</p>`).join('')}<div class="btns col"><button class="btn" data-act="questmap">Zur Karte →</button></div></section>`;
+  }
+  function viewQuestLevel() {
+    const g = S.grade, i = view.questIdx, lv = questLevels(g)[i], e = encOf(g, lv), arc = Q.arcs[g];
+    const n = lv.boss ? 15 : 10, need = Math.ceil(n * (lv.boss ? 0.8 : 0.7));
+    return `<div class="bar-top no-print"><button class="back" data-act="questmap" aria-label="Zurück">←</button><h2>${esc(e[0])}</h2></div>
+      <section class="card story-card"><div class="big-ic">${e[2]}</div><h3>${esc(e[1])}</h3><p class="story">${esc(story(g, e[3]))}</p>
+        <p class="hint"><b>Aufgabe:</b> Beantworte Fragen ${lv.boss ? 'aus allen Fächern' : 'aus dem Fach ' + esc(lv.subject.name)}. Mit ${need} richtigen Antworten von etwa ${n} gewinnst du. Du hast ${n - need + 1} Leben ❤️ – bei zu vielen Fehlern ist der Kampf verloren (du kannst es beliebig oft versuchen).</p>
+        <div class="btns col"><button class="btn" data-act="questfight" data-i="${i}">⚔️ Kampf beginnen</button>${lv.boss ? '' : `<button class="btn ghost" data-act="subject" data-id="${lv.id}">Erst üben</button>`}</div></section>`;
+  }
+
   function viewQuiz() {
     const it = sess.items[sess.i], p = sess.picked, answered = p != null, total = sess.items.length, test = sess.mode === 'test';
     const bar = `<div class="bar-top no-print"><button class="back" data-act="quit" aria-label="Abbrechen">✕</button>
-        <div class="prog"><div class="bar big"><i style="width:${Math.round((sess.i + (answered ? 1 : 0)) / total * 100)}%"></i></div><small>Aufgabe ${sess.i + 1} von ${total} · ${esc(sess.title)}${sess.ch ? ' · ⚔️ gegen ' + esc(sess.ch.n) : ''}</small></div></div>`;
+        <div class="prog"><div class="bar big"><i style="width:${Math.round((sess.i + (answered ? 1 : 0)) / total * 100)}%"></i></div><small>Aufgabe ${sess.i + 1} von ${total} · ${esc(sess.title)}${sess.ch ? ' · ⚔️ gegen ' + esc(sess.ch.n) : ''}</small></div></div>${sess.mode === 'quest' ? questPanel() : ''}`;
     const nextBtn = `<button class="btn" data-act="next">${sess.i + 1 >= total ? (test ? 'Test abgeben' : 'Ergebnis ansehen') : 'Weiter'} →</button>`;
     if (it.kind === 'mc') {
       const ok = answered && it.opts[p].ok, right = it.opts.find(o => o.ok).t;
@@ -312,9 +392,11 @@
     }
     const t = it.t, last = sess.log[sess.log.length - 1];
     return `${bar}<section class="card q"><span class="tag">🧮 ${esc(it.g.name)}</span><h2 class="qtext">${esc(t.q)}</h2>${t.fig ? `<div class="fig">${t.fig}</div>` : ''}
-      <form class="numform" data-form="num"><input name="a" inputmode="decimal" autocomplete="off" autocapitalize="off" placeholder="Deine Antwort" aria-label="Antwort" ${answered ? 'disabled value="' + esc(p) + '"' : ''}><span class="unit">${esc(t.unit || '')}</span>${answered ? '' : '<button class="btn">Prüfen</button>'}</form>
+      <form class="numform" data-form="num"><div class="numrow"><input name="a" inputmode="${COARSE ? 'none' : 'decimal'}" autocomplete="off" autocapitalize="off" placeholder="Deine Antwort" aria-label="Antwort" ${answered ? 'disabled value="' + esc(p) + '"' : ''}><span class="unit">${esc(t.unit || '')}</span></div>
+        ${answered ? '' : `<div class="keypad" role="group" aria-label="Zahlentastatur">${[['7', '7'], ['8', '8'], ['9', '9'], ['bs', '⌫'], ['4', '4'], ['5', '5'], ['6', '6'], ['clr', 'C'], ['1', '1'], ['2', '2'], ['3', '3'], ['/', '/'], ['−', '−'], ['0', '0'], [',', ','], ['ok', '✓']].map(([k, l]) => k === 'ok' ? `<button class="key ok" aria-label="Prüfen">${l}</button>` : `<button type="button" class="key ${k === 'bs' || k === 'clr' ? 'ctl' : /\d/.test(k) ? '' : 'op'}" data-act="key" data-k="${k}" aria-label="${k === 'bs' ? 'Löschen' : k === 'clr' ? 'Alles löschen' : k === '/' ? 'Bruchstrich' : k === '−' ? 'Minus' : k === ',' ? 'Komma' : k}">${l}</button>`).join('')}</div><p class="hint">Brüche: <b>3/4</b> · Dezimalzahlen mit Komma: <b>0,75</b> · negative Zahlen mit <b>−</b></p>`}</form>
       ${answered ? (test ? `<div class="fb neutral"><b>Antwort gespeichert</b>${nextBtn}</div>` : `<div class="fb ${last.ok ? 'good' : 'bad'}" aria-live="polite"><b>${last.ok ? '🎉 Richtig! +10 XP' : '💡 Nicht ganz'}</b><p>Richtig ist: <strong>${esc(showAns(t))} ${esc(t.unit || '')}</strong></p><p>So rechnest du:</p><ol class="steps">${t.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>${nextBtn}</div>`) : ''}</section>`;
   }
+  const COARSE = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   const exP = (q, lbl) => q.ex && q.ex !== '–' ? `<p class="ex"><span>${lbl}</span> ${esc(q.ex)}</p>` : '';
   const fmt = x => String(Math.round(x * 10000) / 10000).replace('.', ',');
   const showAns = t => Number.isInteger(t.ans) ? fmt(t.ans) : (t.tol >= 0.05 ? (Math.round(t.ans * 10) / 10).toFixed(1) : (Math.round(t.ans * 100) / 100).toFixed(2)).replace('.', ',');
@@ -331,6 +413,17 @@
     const pops = `${r.levelUp ? `<div class="pop">🎊 Level-Up! Du bist jetzt Level ${lv} – ${titleOf(lv)}</div>` : ''}
       ${r.duel ? `<div class="pop ${r.duel.res}">${r.duel.res === 'win' ? '🏆 Du hast gewonnen' : r.duel.res === 'draw' ? '🤝 Unentschieden' : '😅 Knapp verloren'} gegen ${esc(r.duel.name)}: ${c} zu ${r.duel.them}${r.duel.res === 'win' ? ' (+20 XP)' : ''}</div>` : ''}
       ${r.fresh.map(b => `<div class="pop badge">${b.icon} Neues Abzeichen: <b>${esc(b.name)}</b></div>`).join('')}`;
+    if (r.quest) {
+      const R = r.quest, g = R.g, arc = Q.arcs[g], e = encOf(g, { id: R.id, boss: R.boss }), allDone = questIdx(g) >= questLevels(g).length;
+      return `<section class="card result quest-res ${R.win ? 'won' : 'lost'}"><div class="big-ic">${R.win ? '🏆' : '💤'}</div><h2>${R.win ? 'Sieg!' : 'Noch nicht geschafft'}</h2>
+        <p class="story">${esc(story(g, R.win ? e[4] : e[5]))}</p>
+        <p class="xp">${R.c} von ${R.n} richtig · nötig waren ${R.need} · +${r.xp} XP</p>
+        ${R.win && !R.boss ? `<div class="pop badge">🔷 ${esc(e[6])} gefunden!</div>` : ''}${pops}
+        ${R.win && R.boss ? `<div class="card story-end"><b>🎉 Quest abgeschlossen!</b><p class="story">${esc(story(g, arc.epilogue))}</p></div>` : ''}
+        <div class="btns col"><button class="btn" data-act="quest">${R.win ? (allDone ? 'Zur Quest-Karte' : 'Weiter zur Quest-Karte') : 'Zur Quest-Karte'}</button>
+          ${R.win ? '' : `<button class="btn alt" data-act="questfight" data-i="${R.idx}">Nochmal kämpfen</button>${R.boss ? '' : `<button class="btn ghost" data-act="subject" data-id="${R.id}">Erst üben (Themen)</button>`}`}</div></section>
+        ${wrong.length ? `<h2>Das war falsch – so geht es richtig</h2>${wrong.map(reviewBlock).join('')}` : ''}`;
+    }
     if (r.test) {
       const T = r.test, m = Math.floor(T.secs / 60);
       const plan = T.cats.filter(x => x.pct < 80);
@@ -474,7 +567,7 @@
   /* ---------- Render ---------- */
   function render() {
     const sc = view.screen;
-    const body = { home: viewHome, subject: viewSubject, quiz: viewQuiz, result: viewResult, rewards: viewRewards, report: viewReport, friends: viewFriends, challenge: viewChallenge, testsetup: viewTestSetup, sheet: viewSheet, editor: viewEditor, editform: viewEditForm }[sc]();
+    const body = { home: viewHome, subject: viewSubject, quiz: viewQuiz, result: viewResult, rewards: viewRewards, report: viewReport, friends: viewFriends, challenge: viewChallenge, testsetup: viewTestSetup, sheet: viewSheet, editor: viewEditor, editform: viewEditForm, questmap: viewQuestMap, questhero: viewQuestHero, questprolog: viewQuestProlog, questlevel: viewQuestLevel }[sc]();
     const tab = TAB[sc];
     const tabs = sc === 'quiz' ? '' : `<nav class="tabs no-print" aria-label="Hauptnavigation">${[['home', '📚', 'Lernen'], ['tests', '📝', 'Probetest'], ['report', '📊', 'Report'], ['rewards', '🏆', 'Erfolge'], ['friends', '👥', 'Freunde']].map(([id, ic, lb]) => `<button class="${tab === id ? 'on' : ''}" data-act="tab" data-id="${id}" ${tab === id ? 'aria-current="page"' : ''}><span>${ic}</span>${lb}</button>`).join('')}</nav>`;
     $app.innerHTML = `<main class="wrap">${body}</main>${tabs}`;
@@ -498,6 +591,20 @@
     const el = e.target.closest('[data-act]'); if (!el) return;
     const d = el.dataset;
     switch (d.act) {
+      case 'quest': go(S.quest[S.grade] ? 'questmap' : 'questhero'); break;
+      case 'questmap': go('questmap'); break;
+      case 'questprolog': go('questprolog'); break;
+      case 'questgo': go('questlevel', { questIdx: +d.i }); break;
+      case 'questfight': startQuest(S.grade, +d.i); break;
+      case 'questreset': if (confirm('Quest dieser Klasse wirklich neu starten? Dein Fortschritt in der Quest geht verloren (XP und Abzeichen bleiben).')) { delete S.quest[S.grade]; save(); go('questhero'); } break;
+      case 'key': {
+        const inp = $app.querySelector('input[name=a]'); if (!inp || inp.disabled) break;
+        const s = inp.selectionStart == null ? inp.value.length : inp.selectionStart, en = inp.selectionEnd == null ? s : inp.selectionEnd;
+        if (d.k === 'clr') inp.value = '';
+        else if (d.k === 'bs') { if (s !== en) inp.value = inp.value.slice(0, s) + inp.value.slice(en); else if (s > 0) { inp.value = inp.value.slice(0, s - 1) + inp.value.slice(s); inp.setSelectionRange(s - 1, s - 1); } }
+        else { inp.value = inp.value.slice(0, s) + d.k + inp.value.slice(en); inp.setSelectionRange(s + d.k.length, s + d.k.length); }
+        break;
+      }
       case 'tab': go(d.id === 'tests' ? 'testsetup' : d.id); break;
       case 'home': sess = null; go('home'); break;
       case 'setgrade': S.grade = +d.g; save(); if (view.testcfg) view.testcfg.cats = null; render(); break;
@@ -545,6 +652,12 @@
     if (k === 'name') { S.name = f.n.value.trim().slice(0, 20); save(); toast('Name gespeichert'); render(); }
     if (k === 'paste') { const c = parseCode(f.c.value); if (c) go('challenge', { challenge: c }); else toast('Dieser Link ist ungültig.'); }
     if (k === 'num') answerNum(f.a.value);
+    if (k === 'hero') {
+      const name = f.n.value.trim().slice(0, 20); if (!name) return;
+      if (!S.name) S.name = name;
+      S.quest[S.grade] = { hero: { name, emoji: (f.querySelector('input[name=e]:checked') || {}).value || '🧙' }, done: {} };
+      save(); go('questprolog');
+    }
     if (k === 'topic') { collectEditor(); if (saveTopic(view.edit)) { toast('Gespeichert ✓'); go('editor'); } }
   });
   $app.addEventListener('change', e => {

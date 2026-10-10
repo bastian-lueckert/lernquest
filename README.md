@@ -14,6 +14,8 @@ Quiz-Lern-App für das Gymnasium in NRW (Klasse 5–10). Läuft komplett im Brow
 - **Merkbilder:** selbst erzeugte SVG-Grafiken zu vielen Themen (Diagramme, Zeitleisten, Schaltbilder, Zellen …); für alle anderen Themen eine Schlüsselbegriff-Grafik.
 - **Report:** Trefferquote nach Fach und Thema, Schwachstellen, Probetest-Verlauf.
 - **Eigene Themen** im Editor (einzeln oder per Schnell-Import), lokal gespeichert, Export/Import als Datei.
+- **Zahlentastatur** bei allen Rechenaufgaben: Ziffern, Komma, Minus und Bruchstrich als Buttons (am Handy ohne System-Tastatur).
+- **Quest-Modus** pro Klasse: Du wählst einen Charakter und kämpfst dich mit einer Story durch alle Fächer. Pro Fach ein Gegner (Quiz, mindestens 70 % richtig), am Ende ein Endkampf (80 %).
 - **Belohnungen** (XP, Level, Tagesziel, Serie, Abzeichen) und **Freunde-Challenge** per Link.
 
 ## Starten / Veröffentlichen
