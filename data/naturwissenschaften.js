@@ -1,0 +1,62 @@
+LERN.add('biologie', 5, 'wirbeltiere', 'Wirbeltiere', [
+  ['Zu welcher Wirbeltierklasse gehört der Delfin?', 'Säugetiere', 'Fische', 'Reptilien', 'Amphibien',
+    'Delfine atmen mit Lungen, sind gleichwarm und säugen ihre Jungen mit Milch – das sind Säugetiere, auch wenn sie im Wasser leben.',
+    'Ein Delfin muss zum Atmen regelmäßig auftauchen – ein Fisch würde mit Kiemen atmen.'],
+  ['Welche Wirbeltiere sind gleichwarm (Warmblüter)?', 'Vögel und Säugetiere', 'Fische und Amphibien', 'Reptilien und Fische', 'Amphibien und Reptilien',
+    'Gleichwarme Tiere halten ihre Körpertemperatur konstant – auch bei Kälte. Fische, Amphibien und Reptilien sind wechselwarm.',
+    'Eine Eidechse wird an kalten Morgen träge, bis die Sonne sie aufwärmt.'],
+  ['Wie heißt die Jugendform des Frosches im Wasser?', 'Kaulquappe', 'Raupe', 'Puppe', 'Fohlen',
+    'Amphibien durchlaufen eine Metamorphose: Laich → Kaulquappe (mit Kiemen) → Jungfrosch (mit Lungen).',
+    'Im Frühling findest du Froschlaich in Teichen – daraus schlüpfen die Kaulquappen.'],
+  ['Womit atmen Fische im Wasser?', 'Mit Kiemen', 'Mit Lungen', 'Mit der Luftröhre', 'Mit Nasenlöchern allein',
+    'Die Kiemen filtern gelösten Sauerstoff aus dem Wasser.',
+    'Ein Fisch an Land „erstickt“, weil die Kiemenblättchen ohne Wasser zusammenkleben.'],
+  ['Welche Wirbeltiergruppe hat Federn?', 'Vögel', 'Reptilien', 'Säugetiere', 'Amphibien',
+    'Federn gibt es nur bei Vögeln. Sie dienen der Wärmeisolierung und – bei Flugfedern – dem Fliegen.',
+    'Beim Rupfen eines Huhns erkennst du: Daunen wärmen, Schwungfedern tragen.'],
+  ['Wodurch ist die Haut der Reptilien geschützt?', 'Trockene Haut mit Hornschuppen', 'Federn', 'Fell', 'Feuchte Schleimhaut',
+    'Hornschuppen schützen vor dem Austrocknen – deshalb können Reptilien auch in Wüsten leben.',
+    'Schlangen häuten sich mehrfach im Jahr, weil ihre Schuppenhaut nicht mitwächst.']
+]);
+
+LERN.add('biologie', 5, 'pflanzen', 'Pflanzen & Fotosynthese', [
+  ['Was brauchen Pflanzen für die Fotosynthese?', 'Licht, Wasser und Kohlenstoffdioxid', 'Sauerstoff, Zucker und Licht', 'Stickstoff, Wasser und Salz', 'Nur Erde und Wärme',
+    'Mit Lichtenergie bauen Pflanzen aus Wasser und CO₂ Traubenzucker auf.',
+    'Eine Zimmerpflanze im Dunkeln verliert ihre Farbe und kümmert – ihr fehlt das Licht.'],
+  ['Welches Gas geben Pflanzen bei der Fotosynthese ab?', 'Sauerstoff', 'Kohlenstoffdioxid', 'Stickstoff', 'Wasserstoff',
+    'Als „Abfallprodukt“ entsteht Sauerstoff – den atmen wir.',
+    'Darum ist die Luft im Wald an Sommertagen so frisch.'],
+  ['Welche Aufgabe hat die Wurzel?', 'Wasser und Mineralstoffe aufnehmen und die Pflanze verankern', 'Fotosynthese durchführen', 'Samen bilden', 'Insekten anlocken',
+    'Die Wurzel hält die Pflanze im Boden und saugt Wasser samt Mineralstoffen auf.',
+    'Eine Pflanze ohne Wurzel wie ein Schnittblumenstrauß hält nur kurz, weil die Wasseraufnahme begrenzt ist.'],
+  ['Wo findet die Fotosynthese hauptsächlich statt?', 'In den Blättern', 'In den Wurzeln', 'In den Samen', 'In den Blütenkelchen',
+    'Blätter haben viel Fläche und viele Chloroplasten, in denen die Fotosynthese abläuft.',
+    'Darum drehen sich Blätter zum Licht.'],
+  ['Was passiert bei der Bestäubung?', 'Pollen gelangt auf die Narbe', 'Samen fallen zu Boden', 'Wurzeln wachsen in die Tiefe', 'Das Blatt färbt sich im Herbst',
+    'Bei der Bestäubung wird Pollen (männlich) auf die Narbe einer Blüte (weiblich) übertragen. Danach kann sich ein Samen bilden.',
+    'Bienen übertragen Pollen von Blüte zu Blüte, wenn sie Nektar sammeln.'],
+  ['Wie heißt der grüne Blattfarbstoff?', 'Chlorophyll', 'Hämoglobin', 'Keratin', 'Melanin',
+    'Chlorophyll fängt das Licht ein und macht die Fotosynthese möglich.',
+    'Im Herbst wird Chlorophyll abgebaut – dann kommen gelbe und rote Farbstoffe zum Vorschein.']
+]);
+
+LERN.add('physik', 7, 'optik', 'Licht & Optik', [
+  ['Wie schnell ist Licht ungefähr?', '300 000 km pro Sekunde', '300 km pro Sekunde', '3 000 km pro Sekunde', '340 Meter pro Sekunde',
+    'Licht ist das Schnellste im Universum: etwa 300 000 km/s. 340 m/s ist die Geschwindigkeit des Schalls.',
+    'Beim Gewitter siehst du den Blitz sofort, den Donner hörst du erst später.'],
+  ['Welcher Körper ist eine Lichtquelle (leuchtet selbst)?', 'Die Sonne', 'Der Mond', 'Ein Spiegel', 'Ein Katzenauge',
+    'Lichtquellen senden selbst Licht aus. Der Mond wird nur von der Sonne angestrahlt.',
+    'Beleuchtete Körper wie der Mond reflektieren Licht nur.'],
+  ['Wie lautet das Reflexionsgesetz?', 'Einfallswinkel = Reflexionswinkel', 'Einfallswinkel > Reflexionswinkel', 'Einfallswinkel = 90°', 'Reflexionswinkel = 0°',
+    'Ein Lichtstrahl wird am Spiegel so zurückgeworfen, dass beide Winkel (zum Lot) gleich groß sind.',
+    'Beim Billard prallt die Kugel auch im selben Winkel von der Bande ab.'],
+  ['Warum entsteht ein Schatten?', 'Licht breitet sich geradlinig aus', 'Licht biegt sich um Körper', 'Körper saugen Licht auf', 'Licht ist schwer',
+    'Ein undurchsichtiger Körper hält Licht auf. Dahinter bleibt es dunkel – der Schattenraum.',
+    'Je näher die Lampe, desto größer wird dein Schatten an der Wand.'],
+  ['Wann kommt es zu einer Sonnenfinsternis?', 'Der Mond steht zwischen Sonne und Erde', 'Die Erde steht zwischen Sonne und Mond', 'Die Sonne ist ausgeschaltet', 'Wolken verdecken die Sonne weltweit',
+    'Der Mondschatten fällt auf die Erde. Bei einer Mondfinsternis ist es umgekehrt: Die Erde liegt zwischen Sonne und Mond.',
+    'Eine totale Sonnenfinsternis ist nur in einem schmalen Streifen zu sehen.'],
+  ['Wie ist das Bild einer Lochkamera?', 'Auf dem Kopf stehend und seitenverkehrt', 'Aufrecht und seitenrichtig', 'Nur seitenverkehrt', 'Größer als der Gegenstand, aber aufrecht',
+    'Durch die geradlinige Ausbreitung kreuzen sich die Lichtstrahlen im Loch – oben und unten sowie rechts und links vertauschen sich.',
+    'Auch in deinem Auge steht das Bild auf dem Kopf – dein Gehirn dreht es wieder um.']
+]);

@@ -1,0 +1,41 @@
+LERN.add('englisch', 5, 'to-be', 'To be & have got', [
+  ['I ___ 11 years old.', 'am', 'is', 'are', 'be',
+    '„to be“ ändert sich mit der Person: I am, you are, he/she/it is, we/you/they are.',
+    '„I am Max. I am 11.“ – so stellst du dich vor.'],
+  ['She ___ a brother.', 'has got', 'have got', 'is got', 'having',
+    'Mit he/she/it heißt es „has got“, bei allen anderen Personen „have got“.',
+    '„She has got a brother and two sisters.“'],
+  ['They ___ my friends.', 'are', 'is', 'am', 'be',
+    'Bei they (und we, you) steht „are“.',
+    '„We are in the same class.“'],
+  ['Wie sagt man „Wir sind nicht müde“?', 'We aren\'t tired.', 'We not are tired.', 'We don\'t tired.', 'We isn\'t tired.',
+    'Die Verneinung von „to be“ bildet man mit „not“ nach der Form von be: we are not = we aren\'t.',
+    '„I\'m not hungry.“ ist eine Ausnahme – hier sagt man I\'m not (nicht „I amn\'t“).'],
+  ['___ you from Germany?', 'Are', 'Do', 'Is', 'Does',
+    'Fragen mit „to be“ bildest du durch Umstellen: You are … → Are you …?',
+    '„Are you from Düsseldorf?“ – „Yes, I am.“'],
+  ['Wie fragst du „Hast du ein Fahrrad?“', 'Have you got a bike?', 'Do you got a bike?', 'Are you got a bike?', 'Has you got a bike?',
+    'Bei „have got“ stellst du have/has an den Satzanfang: Have you got …? / Has she got …?',
+    '„Have you got a pen?“ – „No, I haven\'t.“']
+]);
+
+LERN.add('englisch', 5, 'simple-present', 'Simple Present', [
+  ['He ___ football every day.', 'plays', 'play', 'playing', 'is play',
+    'Im Simple Present bekommen he/she/it ein -s am Verb: he plays.',
+    '„My brother plays football on Mondays.“'],
+  ['Wie verneint man „She likes pizza“?', 'She doesn\'t like pizza.', 'She doesn\'t likes pizza.', 'She not likes pizza.', 'She don\'t like pizza.',
+    'Verneinung: does not (doesn\'t) + Grundform. Das -s steckt schon in „does“, darum kein -s am Verb.',
+    '„Tom doesn\'t eat fish.“'],
+  ['___ you like music?', 'Do', 'Does', 'Are', 'Is',
+    'Fragen im Simple Present beginnen mit do (I, you, we, they) oder does (he, she, it).',
+    '„Do you like pizza?“ – „Yes, I do.“'],
+  ['Wie lautet „he watch“ in der 3. Person?', 'he watches', 'he watchs', 'he watchies', 'he watching',
+    'Endet das Verb auf -ch, -sh, -s, -x, -o, hängt man -es an.',
+    'Ebenso: he washes, she goes, it fixes.'],
+  ['Wie antwortest du auf „Does he live here?“', 'Yes, he does.', 'Yes, he lives.', 'Yes, he do.', 'Yes, he is.',
+    'Kurzantworten nehmen das Hilfsverb der Frage wieder auf: Yes, he does. / No, he doesn\'t.',
+    '„Does she speak German?“ – „Yes, she does.“'],
+  ['Welches Wort passt typischerweise zum Simple Present?', 'usually', 'yesterday', 'at the moment', 'last year',
+    'Das Simple Present beschreibt Gewohnheiten und Wiederholungen – Signalwörter: always, usually, often, never, every day.',
+    '„I usually get up at 7.“']
+]);

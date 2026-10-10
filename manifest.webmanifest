@@ -1,0 +1,12 @@
+{
+  "name": "LernQuest",
+  "short_name": "LernQuest",
+  "description": "Quiz-Lern-App für das Gymnasium in NRW, Klasse 5–10",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f5fb",
+  "theme_color": "#4f46e5",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
