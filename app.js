@@ -308,19 +308,20 @@
           let cls = ''; if (answered) cls = test ? (i === p ? 'picked' : 'dim') : (o.ok ? 'right' : i === p ? 'wrong' : 'dim');
           return `<button class="opt ${cls}" data-act="answer" data-i="${i}" ${answered ? 'disabled' : ''}><kbd>${i + 1}</kbd><span>${esc(o.t)}</span>${answered && !test && o.ok ? '<em>✓</em>' : answered && !test && i === p ? '<em>✗</em>' : ''}</button>`;
         }).join('')}</div>
-        ${answered ? (test ? `<div class="fb neutral" aria-live="polite"><b>Antwort gespeichert</b><p>Die Auswertung bekommst du am Ende.</p>${nextBtn}</div>` : `<div class="fb ${ok ? 'good' : 'bad'}" aria-live="polite"><b>${ok ? '🎉 Richtig! +10 XP' : '💡 Leider falsch'}</b>${ok ? '' : `<p>Richtig ist: <strong>${esc(right)}</strong></p>`}<p>${esc(it.q.e)}</p><p class="ex"><span>Zum Beispiel</span> ${esc(it.q.ex)}</p>${nextBtn}</div>`) : ''}</section>`;
+        ${answered ? (test ? `<div class="fb neutral" aria-live="polite"><b>Antwort gespeichert</b><p>Die Auswertung bekommst du am Ende.</p>${nextBtn}</div>` : `<div class="fb ${ok ? 'good' : 'bad'}" aria-live="polite"><b>${ok ? '🎉 Richtig! +10 XP' : '💡 Leider falsch'}</b>${ok ? '' : `<p>Richtig ist: <strong>${esc(right)}</strong></p>`}<p>${esc(it.q.e)}</p>${exP(it.q, "Zum Beispiel")}${nextBtn}</div>`) : ''}</section>`;
     }
     const t = it.t, last = sess.log[sess.log.length - 1];
     return `${bar}<section class="card q"><span class="tag">🧮 ${esc(it.g.name)}</span><h2 class="qtext">${esc(t.q)}</h2>${t.fig ? `<div class="fig">${t.fig}</div>` : ''}
       <form class="numform" data-form="num"><input name="a" inputmode="decimal" autocomplete="off" autocapitalize="off" placeholder="Deine Antwort" aria-label="Antwort" ${answered ? 'disabled value="' + esc(p) + '"' : ''}><span class="unit">${esc(t.unit || '')}</span>${answered ? '' : '<button class="btn">Prüfen</button>'}</form>
       ${answered ? (test ? `<div class="fb neutral"><b>Antwort gespeichert</b>${nextBtn}</div>` : `<div class="fb ${last.ok ? 'good' : 'bad'}" aria-live="polite"><b>${last.ok ? '🎉 Richtig! +10 XP' : '💡 Nicht ganz'}</b><p>Richtig ist: <strong>${esc(showAns(t))} ${esc(t.unit || '')}</strong></p><p>So rechnest du:</p><ol class="steps">${t.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>${nextBtn}</div>`) : ''}</section>`;
   }
+  const exP = (q, lbl) => q.ex && q.ex !== '–' ? `<p class="ex"><span>${lbl}</span> ${esc(q.ex)}</p>` : '';
   const fmt = x => String(Math.round(x * 10000) / 10000).replace('.', ',');
   const showAns = t => Number.isInteger(t.ans) ? fmt(t.ans) : (t.tol >= 0.05 ? (Math.round(t.ans * 10) / 10).toFixed(1) : (Math.round(t.ans * 100) / 100).toFixed(2)).replace('.', ',');
 
   function reviewBlock(x) {
     const it = x.it;
-    if (it.kind === 'mc') return `<article class="card rev"><b>${esc(it.q.q)}</b><p>Deine Antwort: <span class="bad-t">${esc(x.given)}</span></p><p>Richtig: <strong>${esc(it.opts.find(o => o.ok).t)}</strong></p><p>${esc(it.q.e)}</p><p class="ex"><span>Zum Beispiel</span> ${esc(it.q.ex)}</p></article>`;
+    if (it.kind === 'mc') return `<article class="card rev"><b>${esc(it.q.q)}</b><p>Deine Antwort: <span class="bad-t">${esc(x.given)}</span></p><p>Richtig: <strong>${esc(it.opts.find(o => o.ok).t)}</strong></p><p>${esc(it.q.e)}</p>${exP(it.q, "Zum Beispiel")}</article>`;
     return `<article class="card rev"><b>${esc(it.t.q)}</b>${it.t.fig ? `<div class="fig">${it.t.fig}</div>` : ''}<p>Deine Antwort: <span class="bad-t">${esc(x.given)}</span></p><p>Richtig: <strong>${esc(showAns(it.t))} ${esc(it.t.unit || '')}</strong></p><ol class="steps">${it.t.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></article>`;
   }
 
@@ -382,7 +383,7 @@
       <article class="sheet"><h1 class="sheet-title">${s.icon} ${esc(s.name)} · Klasse ${ts.length ? ts[0].grade : S.grade}</h1>
       ${ts.map(t => `<section class="sheet-topic"><h2>${esc(t.name)}</h2>${merkbild(t)}
         ${t.pairs ? `<table class="vocab"><tbody>${t.pairs.map(p => `<tr><td>${esc(p[0])}</td><td>${esc(p[1])}</td></tr>`).join('')}</tbody></table>` :
-          t.qs.map(q => `<div class="fact"><b>${esc(q.q)}</b><p>➜ <strong>${esc(q.a)}</strong></p><p>${esc(q.e)}</p><p class="ex"><span>Beispiel</span> ${esc(q.ex)}</p></div>`).join('')}</section>`).join('')}
+          t.qs.map(q => `<div class="fact"><b>${esc(q.q)}</b><p>➜ <strong>${esc(q.a)}</strong></p><p>${esc(q.e)}</p>${exP(q, "Beispiel")}</div>`).join('')}</section>`).join('')}
       <p class="sheet-foot">Erstellt mit LernQuest · ${new Date().toLocaleDateString('de-DE')}</p></article>`;
   }
 
