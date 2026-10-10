@@ -42,7 +42,7 @@ LERN.add('biologie', 8, 'nerven', 'Nerven, Sinne & Hormone', [
   ['Welches Hormon senkt den Blutzuckerspiegel?', 'Insulin', 'Adrenalin', 'Thyroxin', 'Östrogen', 'Insulin aus der Bauchspeicheldrüse lässt Zucker in die Zellen.', 'Bei Diabetes fehlt Insulin oder wirkt nicht.']
 ]);
 LERN.add('biologie', 9, 'genetik', 'Genetik', [
-  ['Welcher Stoff trägt die Erbinformation?', 'DNA', 'RNA nur', 'Protein', 'Fett', 'Die DNA liegt im Zellkern in Chromosomen verpackt.', 'Ein DNA-Test vergleicht diese Information.'],
+  ['Welcher Stoff trägt die Erbinformation?', 'DNA', 'Stärke', 'Protein', 'Fett', 'Die DNA liegt im Zellkern in Chromosomen verpackt.', 'Ein DNA-Test vergleicht diese Information.'],
   ['Wie viele Chromosomen hat eine menschliche Körperzelle?', '46', '23', '48', '64', '23 vom Vater, 23 von der Mutter.', 'Keimzellen haben nur 23.'],
   ['Mendel kreuzt zwei reinerbige Pflanzen (AA × aa). Was gilt für die F1?', 'Alle sind gleich (Aa)', 'Die Hälfte AA', 'Alle aa', 'Viertel aa', 'Uniformitätsregel: Die erste Tochtergeneration ist einheitlich.', 'Rote × weiße Blüte ergibt rosa oder rot – je nach Dominanz.'],
   ['Aa × Aa: Wie ist das Verhältnis der Phänotypen bei Dominanz?', '3 : 1', '1 : 1', '2 : 1', '4 : 0', 'Genotypen 1 AA : 2 Aa : 1 aa → 3 dominant : 1 rezessiv.', 'Die klassische Mendel-Spaltung.'],

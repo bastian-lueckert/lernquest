@@ -87,8 +87,8 @@ button.subj:hover{transform:translateY(-2px)}button.subj:active{transform:scale(
 input{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 12px}
 .how{margin:8px 0 0;padding-left:20px;display:grid;gap:6px}
 .list{padding:4px 16px}
-.fr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.fr:last-child{border:0}
-.fr>div{flex:1}.fr small{display:block}
+.fr{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:10px 0;border-bottom:1px solid var(--line)}.fr:last-child{border:0}
+.fr>div{flex:1;min-width:150px}.fr small{display:block}
 .rk{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--bg);font-weight:700;font-size:.85rem}
 .rec{display:flex;gap:4px}.rec i{font-style:normal;font-weight:700;border-radius:8px;padding:2px 8px;font-size:.85rem}
 .rec .w{background:var(--goodbg);color:var(--good)}.rec .d{background:var(--bg);color:var(--mute)}.rec .l{background:var(--badbg);color:var(--bad)}
@@ -110,8 +110,8 @@ input{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--bg);bord
 .gbig{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px 4px;display:grid;box-shadow:var(--shadow)}
 .gbig b{font-size:2rem;line-height:1}.gbig:hover{border-color:var(--pri)}
 .hint{color:var(--mute);font-size:.9rem;margin-top:8px}
-.numform{display:flex;gap:8px;align-items:center;margin-top:8px}
-.numform input{font-size:1.2rem;max-width:220px}.unit{font-weight:700;color:var(--mute)}
+.numform{margin-top:8px}
+.unit{font-weight:700;color:var(--mute)}
 .steps{margin:6px 0 0;padding-left:22px;display:grid;gap:4px}
 .fig{margin:10px 0}.fig .dia{max-width:320px}
 .dia{width:100%;height:auto;background:#fff;color:#1d2033;border-radius:12px;border:1px solid var(--line)}
@@ -137,7 +137,7 @@ code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:.85rem}
 .sheet-title{font-size:1.4rem;margin-bottom:6px}.sheet-topic{margin-top:16px;break-inside:avoid-page}
 .sheet-topic h2{border-bottom:2px solid var(--line);padding-bottom:4px}
 .fact{padding:8px 0;border-bottom:1px dashed var(--line);break-inside:avoid}.fact p{margin-top:2px}
-.vocab{width:100%;border-collapse:collapse;columns:2}.vocab td{border-bottom:1px solid var(--line);padding:4px 6px;font-size:.95rem}
+.vocab{width:100%;border-collapse:collapse}.vocab td{border-bottom:1px solid var(--line);padding:4px 6px;font-size:.95rem}
 .vocab td:first-child{font-weight:600}
 .sheet-foot{color:var(--mute);font-size:.8rem;margin-top:14px;text-align:center}
 .tabs button{font-size:.7rem;padding:6px 2px}
@@ -184,4 +184,7 @@ code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:.85rem}
 .heropick span{display:grid;place-items:center;width:56px;height:56px;font-size:2rem;border-radius:16px;border:2px solid var(--line);background:var(--bg)}
 .heropick input:checked+span{border-color:var(--pri);background:rgba(79,70,229,.15)}
 .heropick input:focus-visible+span{outline:3px solid var(--pri)}
-.numform{display:block}
+
+/* ---- Hinweis „Neue Version“ ---- */
+.toast.update{display:flex;gap:12px;align-items:center;animation:none;transform:translateX(-50%)}
+.toast.update .btn{min-height:36px;padding:6px 12px;white-space:nowrap}

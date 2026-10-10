@@ -79,7 +79,7 @@ LERN.add('erdkunde', 5, 'deutschland', 'Deutschland im Überblick', [
   ['Welcher Fluss fließt durch Köln und Düsseldorf?', 'Der Rhein', 'Die Elbe', 'Die Donau', 'Die Weser', 'Der Rhein mündet in die Nordsee.', 'Er ist die wichtigste Wasserstraße Deutschlands.']
 ]);
 LERN.add('erdkunde', 6, 'europa', 'Europa', [
-  ['Wie heißt der höchste Berg der Alpen?', 'Mont Blanc', 'Zugspitze', 'Matterhorn', 'Großglockner', 'Er ist 4 807 m hoch und liegt an der französisch-italienischen Grenze.', 'Zur Spitze führen Wanderwege und eine Seilbahn nahebei.'],
+  ['Wie heißt der höchste Berg der Alpen?', 'Mont Blanc', 'Zugspitze', 'Matterhorn', 'Großglockner', 'Er ist 4 807 m hoch und liegt an der französisch-italienischen Grenze.', 'Bergsteiger brauchen für den Aufstieg meist zwei Tage.'],
   ['In welches Meer mündet die Donau?', 'Schwarzes Meer', 'Nordsee', 'Mittelmeer', 'Ostsee', 'Sie fließt durch zehn Länder.', 'Auf ihr fahren Flusskreuzfahrten von Passau bis Budapest.'],
   ['Wie heißt die Hauptstadt von Spanien?', 'Madrid', 'Barcelona', 'Lissabon', 'Valencia', 'Barcelona ist nur die Hauptstadt Kataloniens.', 'Madrid liegt im Landesinneren.'],
   ['Wie viele Mitgliedstaaten hat die EU (seit 2020)?', '27', '28', '15', '40', 'Großbritannien ist 2020 ausgetreten (Brexit).', 'Der Euro gilt in den meisten EU-Staaten.'],
@@ -88,7 +88,7 @@ LERN.add('erdkunde', 6, 'europa', 'Europa', [
 LERN.add('erdkunde', 7, 'klimazonen', 'Klima- & Vegetationszonen', [
   ['In welcher Klimazone liegt Deutschland?', 'Gemäßigte Zone', 'Tropen', 'Polarzone', 'Subtropen', 'Vier Jahreszeiten sind typisch.', 'Mal Regen, mal Sonne.'],
   ['Was ist typisch für den tropischen Regenwald?', 'Ganzjährig hohe Temperaturen und viel Regen', 'Lange kalte Winter', 'Wenig Niederschlag', 'Schnee im Sommer', 'Der Regenwald hat Stockwerke von Boden bis Baumkronen.', 'Er liegt rund um den Äquator.'],
-  ['Wie nennt man die Savanne?', 'Trockener Grasland mit Regen- und Trockenzeit', 'Eiswüste', 'Nadelwald', 'Hochgebirge', 'In Afrika leben dort Löwen, Zebras und Elefanten.', 'In der Trockenzeit wandern Tiere zu Wasserstellen.'],
+  ['Was ist eine Savanne?', 'Grasland mit Regen- und Trockenzeit', 'Eiswüste', 'Nadelwald', 'Hochgebirge', 'In Afrika leben dort Löwen, Zebras und Elefanten.', 'In der Trockenzeit wandern Tiere zu Wasserstellen.'],
   ['Welche größte Trockenwüste liegt in Nordafrika?', 'Sahara', 'Gobi', 'Kalahari', 'Atacama', 'Die Sahara ist die größte Heißwüste der Erde.', 'Karawanen zogen durch Oasen.'],
   ['Wie nennt man den Nadelwaldgürtel im Norden?', 'Taiga', 'Tundra', 'Steppe', 'Savanne', 'Nördlich davon schließt sich die baumlose Tundra an.', 'Er erstreckt sich über Kanada, Skandinavien und Sibirien.']
 ]);
@@ -171,7 +171,7 @@ LERN.add('religion', 7, 'christentum', 'Christliche Feste & Reformation', [
   ['Was feiern Christen an Pfingsten?', 'Die Sendung des Heiligen Geistes', 'Die Geburt Jesu', 'Die Himmelfahrt', 'Allerheiligen', 'Pfingsten gilt als Geburtstag der Kirche.', 'Es liegt 50 Tage nach Ostern.'],
   ['Was löste Martin Luther 1517 aus?', 'Die Reformation', 'Den Bauernkrieg direkt', 'Das Konzil von Trient', 'Den Buchdruck', '95 Thesen gegen den Ablasshandel.', 'Daraus entstand die evangelische Kirche.'],
   ['Wie viele Adventssonntage gibt es?', '4', '3', '5', '2', 'Advent bedeutet „Ankunft“ und bereitet auf Weihnachten vor.', 'Der Adventskranz hat vier Kerzen.'],
-  ['Wo hing Luther seine Thesen auf (der Überlieferung nach)?', 'Schlosskirche in Wittenberg', 'Petersdom in Rom', 'Kölner Dom', 'Aachener Dom', 'Der Thesenanschlag wird am 31. Oktober gefeiert.', 'Der Reformationstag ist in manchen Ländern Feiertag.']
+  ['Wo hing Luther seine Thesen auf (der Überlieferung nach)?', 'Schlosskirche in Wittenberg', 'Petersdom in Rom', 'Kölner Dom', 'Aachener Dom', 'Der Thesenanschlag wird am 31. Oktober gefeiert.', 'Der Reformationstag ist in mehreren Bundesländern ein Feiertag.']
 ]);
 LERN.add('religion', 8, 'ethik', 'Ethik & Moral', [
   ['Wie lautet die Goldene Regel?', 'Was du nicht willst, das man dir tu, das füg auch keinem andern zu', 'Auge um Auge', 'Jeder ist seines Glückes Schmied', 'Nach mir die Sintflut', 'Sie findet sich in vielen Religionen und Kulturen.', 'Behandle andere so, wie du behandelt werden willst.'],

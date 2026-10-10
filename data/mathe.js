@@ -21,7 +21,7 @@ LERN.add('mathe', 5, 'rechengesetze', 'Rechenregeln & Rechengesetze', [
 
 LERN.add('mathe', 5, 'flaechen', 'Umfang & Flächeninhalt', [
   ['Ein Rechteck ist 8 cm lang und 5 cm breit. Wie groß ist sein Flächeninhalt?', '40 cm²', '26 cm²', '13 cm²', '40 cm',
-    'Flächeninhalt = Länge · Breite = 8 cm · 5 cm = 40 cm². Flächen messt du in Quadrateinheiten.',
+    'Flächeninhalt = Länge · Breite = 8 cm · 5 cm = 40 cm². Flächen misst du in Quadrateinheiten.',
     'So viele 1-cm-Kästchen passen auf ein Rechteck dieser Größe in dein Heft.'],
   ['Wie groß ist der Umfang dieses Rechtecks (8 cm × 5 cm)?', '26 cm', '40 cm', '13 cm', '20 cm',
     'Umfang = 2 · (Länge + Breite) = 2 · 13 cm = 26 cm. Das ist die Strecke einmal rundherum.',

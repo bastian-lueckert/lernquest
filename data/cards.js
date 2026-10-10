@@ -4,23 +4,30 @@
 LERN.pairs = function (subject, grade, id, name, tpl, pairs) {
   const n = pairs.length;
   const fill = (s, p) => String(s).replace(/\{0\}/g, p[0]).replace(/\{1\}/g, p[1]);
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  // Schrittweite, die teilerfremd zu n ist: so werden garantiert alle anderen Paare besucht.
+  const step = [7, 11, 13, 5, 3, 2, 1].find(s => s < n && gcd(s, n) === 1) || 1;
   const wrongs = (i, col) => {
-    const right = pairs[i][col], out = [];
-    for (let k = 1, j = i; out.length < 3 && k < n * 4; k++) {
-      j = (j + 5 + (k % 3) * 4 + Math.floor(n / 7)) % n;
-      const c = pairs[j][col];
-      if (c !== right && !out.includes(c)) out.push(c);
+    const right = pairs[i][col], other = pairs[i][1 - col], out = [];
+    for (let k = 1; out.length < 3 && k < n; k++) {
+      const p = pairs[(i + k * step) % n], c = p[col];
+      // Nicht als falsche Antwort nehmen, was ebenfalls richtig wäre (gleicher Begriff oder gleiche Erklärung).
+      if (c === right || p[1 - col] === other || out.includes(c)) continue;
+      out.push(c);
     }
     return out;
   };
-  const rows = [];
+  const rows = [], grp = [];
   pairs.forEach((p, i) => {
     const w = wrongs(i, 1), ex = p[2] || (tpl.ex ? fill(tpl.ex, p) : '–');
-    if (w.length === 3) rows.push([fill(tpl.q, p), p[1], w[0], w[1], w[2], fill(tpl.e, p), ex]);
-    if (tpl.qr) { const v = wrongs(i, 0); if (v.length === 3) rows.push([fill(tpl.qr, p), p[0], v[0], v[1], v[2], fill(tpl.e, p), ex]); }
+    if (w.length === 3) { rows.push([fill(tpl.q, p), p[1], w[0], w[1], w[2], fill(tpl.e, p), ex]); grp.push(i); }
+    if (tpl.qr) { const v = wrongs(i, 0); if (v.length === 3) { rows.push([fill(tpl.qr, p), p[0], v[0], v[1], v[2], fill(tpl.e, p), ex]); grp.push(i); } }
   });
   LERN.add(subject, grade, id, name, rows);
-  LERN.topics[LERN.topics.length - 1].pairs = pairs.map(p => [p[0], p[1]]);
+  const t = LERN.topics[LERN.topics.length - 1];
+  t.pairs = pairs.map(p => [p[0], p[1]]);
+  // grp: Hin- und Rückfrage desselben Paares gehören zusammen und sollen nicht im selben Quiz landen.
+  t.qs.forEach((q, k) => { q.grp = grp[k]; });
 };
 
 /* Wiederverwendbare Vorlagen */

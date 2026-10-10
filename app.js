@@ -27,7 +27,9 @@
   const defaults = () => ({ name: '', grade: 0, xp: 0, streak: 0, bestStreak: 0, lastDay: '', quizzes: 0, correct: 0, answered: 0, perfect: 0, duels: 0, wins: 0, tests: [], genCorrect: 0, best: {}, wrong: {}, badges: {}, friends: {}, played: {}, stats: {}, custom: [], quest: {}, daily: { day: '', n: 0 } });
   const load = () => { try { return Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { return defaults(); } };
   let S = load();
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* privater Modus */ } };
+  if (!L.grades.includes(S.grade)) S.grade = 0;
+  const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  const save =() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* privater Modus */ } };
 
   /* ---------- Eigene Themen einbinden ---------- */
   L.base = L.topics.slice();
@@ -70,12 +72,62 @@
   /* ---------- Navigation ---------- */
   const view = { screen: 'home', subject: null, challenge: null, sheet: null, edit: null, testcfg: null };
   let sess = null;
-  const go = (screen, extra) => { Object.assign(view, { screen }, extra); render(); window.scrollTo(0, 0); };
+  const go = (screen, extra) => {
+    Object.assign(view, { screen }, extra); render(); window.scrollTo(0, 0);
+    if (screen === 'home') disarmBack(); else armBack();
+  };
+
+  /* ---------- Zurück-Navigation (Pfeil in der App und Zurück-Taste von Browser/Handy) ---------- */
+  const PARENT = { editform: 'editor', questprolog: 'questmap', questlevel: 'questmap' };
+  function goBack() {
+    const sc = view.screen;
+    if (sc === 'home') return;
+    const wasQuest = !!(sess && sess.mode === 'quest');
+    if (sc === 'quiz') {
+      if (!confirm('Wirklich abbrechen? Dein Fortschritt in dieser Runde geht verloren.')) return;
+      sess = null; go(wasQuest ? 'questmap' : 'home'); return;
+    }
+    if (sc === 'result') { sess = null; go(wasQuest ? 'questmap' : 'home'); return; }
+    if (sc === 'sheet') {
+      const sh = view.sheet, t = sh.key && topicByKey(sh.key), s = t ? t.subject : sh.subject;
+      if (sh.from === 'result' && sess && sess.result) go('result');
+      else if (sh.from === 'report') go('report');
+      else if (s) go('subject', { subject: s });
+      else go('home');
+      return;
+    }
+    let to = PARENT[sc] || 'home';
+    if (to === 'questmap' && !S.quest[S.grade]) to = 'home';
+    go(to);
+  }
+  // Ein zusätzlicher Verlaufseintrag dient als Puffer: Die Zurück-Taste führt dann innerhalb der App zurück,
+  // statt die Seite zu verlassen (und z. B. ein laufendes Quiz zu verlieren).
+  let skipPop = 0;
+  const hasBuffer = () => !!(history.state && history.state.lq);
+  function armBack() { try { if (!hasBuffer()) history.pushState({ lq: 1 }, ''); } catch { /* z. B. file:// */ } }
+  function disarmBack() { try { if (hasBuffer()) { skipPop++; history.back(); } } catch { /* egal */ } }
+  window.addEventListener('popstate', () => {
+    if (skipPop) { skipPop--; return; }
+    if (view.screen === 'home') return;
+    goBack();
+    if (view.screen !== 'home') armBack();
+  });
   const TAB = { home: 'home', subject: 'home', sheet: 'home', editor: 'home', editform: 'home', testsetup: 'tests', rewards: 'rewards', report: 'report', friends: 'friends', challenge: 'friends', result: 'home', questmap: 'home', questhero: 'home', questprolog: 'home', questlevel: 'home' };
 
   /* ---------- Items & Sitzungen ---------- */
   const mcItem = (q, r, review) => ({ kind: 'mc', q, review, opts: shuffle([{ t: q.a, ok: true }, ...q.w.map(t => ({ t, ok: false }))], r) });
-  const numItem = g => ({ kind: 'num', g, t: g.make(Math.random) });
+  // Rundungsfehler der Gleitkommarechnung entfernen (z. B. 113.00000000000001 → 113)
+  const numItem = g => { const t = g.make(Math.random); t.ans = Math.round(t.ans * 1e9) / 1e9; return { kind: 'num', g, t }; };
+  // Wählt bis zu n Fragen; Hin- und Rückfrage desselben Begriffspaares (q.grp) kommen nie gemeinsam vor.
+  const pickQs = (qs, n, r) => {
+    const out = [], seen = new Set();
+    for (const q of shuffle(qs, r)) {
+      if (out.length >= n) break;
+      if (q.grp != null) { const k = q.topicKey + '#' + q.grp; if (seen.has(k)) continue; seen.add(k); }
+      out.push(q);
+    }
+    return out;
+  };
   const keyOf = it => it.kind === 'mc' ? it.q.topicKey : 'gen:' + it.g.id;
   const nameOfKey = k => k.startsWith('gen:') ? '🧮 ' + ((genById(k.slice(4)) || {}).name || k) : ((topicByKey(k) || {}).name || k);
   const subjOfKey = k => k.startsWith('gen:') ? (genById(k.slice(4)) || {}).subject : (topicByKey(k) || {}).subject;
@@ -83,7 +135,7 @@
   function startQuiz(t, o = {}) {
     const seeded = o.seed != null;
     const r = seeded ? rng(o.seed) : Math.random;
-    let items = shuffle(t.qs, r).slice(0, o.count || QUIZ_LEN).map(q => mcItem(q, r, false));
+    let items = pickQs(t.qs, o.count || QUIZ_LEN, r).map(q => mcItem(q, r, false));
     if (!seeded) {
       const extra = shuffle(Object.keys(S.wrong).map(qById).filter(q => q && q.subject === t.subject && q.topicKey !== t.key)).slice(0, 2);
       items = shuffle(items.concat(extra.map(q => mcItem(q, r, true))));
@@ -104,7 +156,7 @@
   function startTest(cfg) {
     const cats = shuffle(cfg.cats);
     const pools = {};
-    cats.forEach(k => { pools[k] = k.startsWith('gen:') ? null : shuffle(topicByKey(k).qs); });
+    cats.forEach(k => { pools[k] = k.startsWith('gen:') ? null : pickQs(topicByKey(k).qs, cfg.n); });
     const items = []; let guard = 0;
     while (items.length < cfg.n && guard++ < 2000) {
       let progressed = false;
@@ -135,7 +187,7 @@
     const mcPool = boss ? L.subjects.filter(s => s.id !== 'eigene').flatMap(s => topicsFor(s.id, g).flatMap(t => t.qs)) : topicsFor(lv.id, g).flatMap(t => t.qs);
     const gens = shuffle(boss ? (L.gens || []).filter(x => x.grade === g) : gensFor(lv.id, g));
     const nNum = gens.length ? 3 : 0;
-    const mc = shuffle(mcPool).slice(0, want - nNum).map(q => mcItem(q, Math.random, false));
+    const mc = pickQs(mcPool, want - nNum).map(q => mcItem(q, Math.random, false));
     const nums = Array.from({ length: Math.max(0, Math.min(want - mc.length, gens.length ? want : 0)) }, (_, i) => numItem(gens[i % gens.length]));
     const items = shuffle(mc.concat(nums));
     if (!items.length) return;
@@ -147,7 +199,7 @@
   function questPanel() {
     const qs = sess.quest, g = qs.g, wrong = sess.log.length - sess.correct, maxLives = qs.n - qs.need + 1, lives = Math.max(0, maxLives - wrong);
     const e = encOf(g, { id: qs.id, boss: qs.boss }), hp = Math.max(0, 100 - Math.round(sess.correct / qs.need * 100));
-    return `<div class="fight"><div class="mon"><span class="mon-ic">${e[2]}</span><div><b>${esc(e[1])}</b><div class="bar hp"><i style="width:${hp}%"></i></div><small>Noch ${Math.max(0, qs.need - sess.correct)} Treffer nötig</small></div></div><div class="hero"><span class="hero-ic">${S.quest[g].hero.emoji}</span><span class="hearts" aria-label="${lives} Leben">${'❤️'.repeat(lives)}${'🖤'.repeat(maxLives - lives)}</span></div></div>`;
+    return `<div class="fight"><div class="mon"><span class="mon-ic">${e[2]}</span><div><b>${esc(e[1])}</b><div class="bar hp"><i style="width:${hp}%"></i></div><small>Noch ${Math.max(0, qs.need - sess.correct)} Treffer nötig</small></div></div><div class="hero"><span class="hero-ic">${esc(S.quest[g].hero.emoji)}</span><span class="hearts" aria-label="${lives} Leben">${'❤️'.repeat(lives)}${'🖤'.repeat(maxLives - lives)}</span></div></div>`;
   }
 
   /* ---------- Antworten ---------- */
@@ -171,31 +223,43 @@
     record(it, it.opts[i].ok, it.opts[i].t);
     render(); focusNext();
   }
+  // Versteht 12,5 · 12.5 · −3 · 3/4 · gemischte Zahlen wie „1 1/2“; Einheiten am Ende werden ignoriert.
   function parseNum(s) {
-    s = String(s).trim().replace(/\s/g, '').replace(/[−–]/g, '-');
+    s = String(s).trim().replace(/[−–]/g, '-');
+    const mixed = s.match(/^(-?)(\d+)\s+(\d+)\s*\/\s*(\d+)/);
+    if (mixed) { const d = +mixed[4]; return d ? (mixed[1] ? -1 : 1) * (+mixed[2] + +mixed[3] / d) : NaN; }
+    s = s.replace(/\s/g, '');
     const m = s.match(/^([-+]?\d+(?:[.,]\d+)?)(?:\/(\d+(?:[.,]\d+)?))?/);
     if (!m) return NaN;
     const a = parseFloat(m[1].replace(',', '.'));
     if (m[2]) { const b = parseFloat(m[2].replace(',', '.')); return b ? a / b : NaN; }
     return a;
   }
+  // Mögliche Lesarten einer Eingabe: „1.024“ kann 1,024 oder 1024 (Tausenderpunkt) bedeuten.
+  function numCandidates(text) {
+    const out = [parseNum(text)], s = String(text).trim();
+    if (/^[-−–]?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s.replace(/\s/g, ''))) out.push(parseNum(s.replace(/\./g, '')));
+    return out.filter(v => !isNaN(v));
+  }
+  // Ohne eigene Toleranz der Aufgabe zählt nur das exakte Ergebnis (bis auf Rundungsfehler).
+  const tolOf = t => t.tol != null ? t.tol : 1e-6 + Math.abs(t.ans) * 1e-9;
+  const isRight = (t, text) => numCandidates(text).some(v => Math.abs(v - t.ans) <= tolOf(t));
   function answerNum(text) {
     if (!sess || sess.picked != null) return;
     const it = sess.items[sess.i];
     if (it.kind !== 'num') return;
-    const v = parseNum(text);
-    if (isNaN(v)) { toast('Bitte eine Zahl eingeben (z. B. 12,5 oder 3/4).'); return; }
-    const t = it.t, tol = t.tol != null ? t.tol : (Number.isInteger(t.ans) ? 0.0005 : Math.max(0.011, Math.abs(t.ans) * 0.0002));
-    sess.picked = text;
-    record(it, Math.abs(v - t.ans) <= tol, text);
+    if (!numCandidates(text).length) { toast('Bitte eine Zahl eingeben (z. B. 12,5 oder 3/4).'); return; }
+    sess.picked = String(text).trim();
+    record(it, isRight(it.t, text), sess.picked);
     render(); focusNext();
   }
+  // Ein Quest-Kampf endet vorzeitig, sobald genug Treffer erreicht oder alle Leben verbraucht sind.
+  const fightOver = () => !!sess && sess.mode === 'quest' && (sess.correct >= sess.quest.need || (sess.log.length - sess.correct) > sess.quest.n - sess.quest.need);
   const focusNext = () => { const nx = $app.querySelector('[data-act=next]'); if (nx) nx.focus({ preventScroll: true }); };
   function next() {
     if (!sess || sess.picked == null) return;
     sess.picked = null;
-    const fightOver = sess.mode === 'quest' && (sess.correct >= sess.quest.need || (sess.log.length - sess.correct) > sess.quest.n - sess.quest.need);
-    if (fightOver || ++sess.i >= sess.items.length) finish(); else { render(); const inp = $app.querySelector('input[name=a]'); if (inp) inp.focus({ preventScroll: true }); }
+    if (fightOver() || ++sess.i >= sess.items.length) finish(); else { render(); const inp = $app.querySelector('input[name=a]'); if (inp) inp.focus({ preventScroll: true }); }
   }
 
   function finish() {
@@ -218,7 +282,7 @@
     if (sess.ch) {
       const o = sess.ch, res = c > o.p ? 'win' : c < o.p ? 'loss' : 'draw';
       S.duels++; if (res === 'win') { S.wins++; xp += 20; }
-      const f = S.friends[o.n] || { w: 0, d: 0, l: 0 };
+      const f = own(S.friends, o.n) ? S.friends[o.n] : { w: 0, d: 0, l: 0 };
       f[res === 'win' ? 'w' : res === 'draw' ? 'd' : 'l']++;
       f.last = { me: c, them: o.p, of: n, topic: sess.title };
       S.friends[o.n] = f;
@@ -259,7 +323,10 @@
       const o = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
       const t = L.topics.find(x => !x.custom && x.subject === o.s && x.grade === o.g && x.id === o.t);
       if (!t || !Number.isInteger(o.d) || !Number.isInteger(o.p) || !Number.isInteger(o.m) || o.p < 0 || o.m < 1 || o.p > o.m || o.m > t.qs.length) return null;
-      return { topic: t, seed: o.d, p: o.p, m: o.m, n: String(o.n || 'Freund').slice(0, 20) };
+      // Der Name stammt aus einem fremden Link: kürzen und Namen sperren, die Objekt-Eigenschaften überschreiben würden.
+      let name = String(o.n || 'Freund').trim().slice(0, 20) || 'Freund';
+      if (name in Object.prototype) name = 'Freund';
+      return { topic: t, seed: o.d, p: o.p, m: o.m, n: name };
     } catch { return null; }
   }
   const parseCode = txt => { const m = String(txt).match(/#c=([^\s&]+)/); return dec(m ? m[1] : txt); };
@@ -317,7 +384,7 @@
     const subs = L.subjects.filter(s => topicsFor(s.id, g).length || gensFor(s.id, g).length);
     return `${header()}${gradeChips()}
       <section class="card goal"><div class="row"><b>Tagesziel</b><span>${Math.min(dn, DAILY_GOAL)} / ${DAILY_GOAL} richtige Antworten ${dn >= DAILY_GOAL ? '✅' : ''}</span></div><div class="bar big"><i style="width:${dp}%"></i></div></section>
-      ${(() => { const st = S.quest[g], arc = Q.arcs[g], tot = questLevels(g).length, cur = questIdx(g); return `<button class="card questcard" data-act="quest"><span class="ic">🗺️</span><span><b>Quest-Modus: ${esc(arc.world)}</b><small>${!st ? 'Starte dein Abenteuer durch alle Fächer von Klasse ' + g + '!' : cur >= tot ? '🏆 Quest abgeschlossen – nochmal spielen?' : 'Weiter mit Level ' + (cur + 1) + ' von ' + tot + ' – ' + esc(st.hero.name) + ' ' + st.hero.emoji}</small></span></button>`; })()}
+      ${(() => { const st = S.quest[g], arc = Q.arcs[g], tot = questLevels(g).length, cur = questIdx(g); return `<button class="card questcard" data-act="quest"><span class="ic">🗺️</span><span><b>Quest-Modus: ${esc(arc.world)}</b><small>${!st ? 'Starte dein Abenteuer durch alle Fächer von Klasse ' + g + '!' : cur >= tot ? '🏆 Quest abgeschlossen – nochmal spielen?' : 'Weiter mit Level ' + (cur + 1) + ' von ' + tot + ' – ' + esc(st.hero.name) + ' ' + esc(st.hero.emoji)}</small></span></button>`; })()}
       ${wrongN ? `<button class="card review" data-act="review"><span class="ic">🔁</span><span><b>Wiederholen</b><small>${wrongN} Frage${wrongN > 1 ? 'n' : ''}, die du noch festigen kannst</small></span></button>` : ''}
       <h2>Deine Fächer in Klasse ${g}</h2>
       <div class="grid">${subs.map(s => {
@@ -347,10 +414,10 @@
     const g = S.grade, st = S.quest[g], arc = Q.arcs[g], lv = questLevels(g), cur = questIdx(g), done = cur >= lv.length;
     const crystals = lv.filter(l => !l.boss && questDone(g, l.id)).length;
     return `${header()}<div class="bar-top no-print"><button class="back" data-act="home" aria-label="Zurück">←</button><h2>🗺️ ${esc(arc.world)}</h2></div>
-      <section class="card hero-card"><span class="hero-big">${st.hero.emoji}</span><div><b>${esc(st.hero.name)}</b><small>Klasse ${g} · 🔷 ${crystals} von ${lv.length - 1} Kristallen${done ? ' · 🏆 Quest geschafft' : ''}</small></div><button class="btn ghost" data-act="questprolog">📖 Story</button></section>
+      <section class="card hero-card"><span class="hero-big">${esc(st.hero.emoji)}</span><div><b>${esc(st.hero.name)}</b><small>Klasse ${g} · 🔷 ${crystals} von ${lv.length - 1} Kristallen${done ? ' · 🏆 Quest geschafft' : ''}</small></div><button class="btn ghost" data-act="questprolog">📖 Story</button></section>
       ${done ? `<section class="card story-end"><b>🎉 Quest abgeschlossen!</b><p class="story">${esc(story(g, arc.epilogue))}</p></section>` : ''}
       <div class="path">${lv.map((l, i) => {
-        const e = encOf(g, l), isDone = questDone(g, l.id), isCur = i === cur, locked = i > cur;
+        const e = encOf(g, l), isDone = questDone(g, l.id), isCur = i === cur, locked = i > cur && !isDone;
         return `<article class="card node ${isDone ? 'done' : isCur ? 'cur' : 'locked'}"><span class="node-ic">${locked ? '🔒' : e[2]}</span><div><b>${l.boss ? '⚔️ Endkampf: ' : ''}${esc(locked && l.boss ? 'Der Endkampf wartet …' : e[0])}</b><small>${locked ? 'Besiege zuerst den vorherigen Gegner' : esc(e[1]) + (l.boss ? '' : ' · ' + esc(l.subject.name))}</small>${isDone ? `<small class="ok-t">✅ Bestleistung ${st.done[l.id]} %</small>` : ''}</div>${locked ? '' : `<button class="btn ${isCur ? '' : 'ghost'}" data-act="questgo" data-i="${i}">${isDone ? 'Erneut' : 'Kämpfen'}</button>`}</article>`;
       }).join('')}</div>
       <div class="btns no-print" style="margin-top:14px"><button class="btn ghost" data-act="questreset">Quest neu starten</button></div>`;
@@ -380,7 +447,8 @@
     const it = sess.items[sess.i], p = sess.picked, answered = p != null, total = sess.items.length, test = sess.mode === 'test';
     const bar = `<div class="bar-top no-print"><button class="back" data-act="quit" aria-label="Abbrechen">✕</button>
         <div class="prog"><div class="bar big"><i style="width:${Math.round((sess.i + (answered ? 1 : 0)) / total * 100)}%"></i></div><small>Aufgabe ${sess.i + 1} von ${total} · ${esc(sess.title)}${sess.ch ? ' · ⚔️ gegen ' + esc(sess.ch.n) : ''}</small></div></div>${sess.mode === 'quest' ? questPanel() : ''}`;
-    const nextBtn = `<button class="btn" data-act="next">${sess.i + 1 >= total ? (test ? 'Test abgeben' : 'Ergebnis ansehen') : 'Weiter'} →</button>`;
+    const lastOne = sess.i + 1 >= total || fightOver();
+    const nextBtn = `<button class="btn" data-act="next">${lastOne ? (test ? 'Test abgeben' : 'Ergebnis ansehen') : 'Weiter'} →</button>`;
     if (it.kind === 'mc') {
       const ok = answered && it.opts[p].ok, right = it.opts.find(o => o.ok).t;
       return `${bar}<section class="card q">${it.review ? '<span class="tag">🔁 Wiederholung</span>' : ''}<h2 class="qtext">${esc(it.q.q)}</h2>
@@ -398,8 +466,8 @@
   }
   const COARSE = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   const exP = (q, lbl) => q.ex && q.ex !== '–' ? `<p class="ex"><span>${lbl}</span> ${esc(q.ex)}</p>` : '';
-  const fmt = x => String(Math.round(x * 10000) / 10000).replace('.', ',');
-  const showAns = t => Number.isInteger(t.ans) ? fmt(t.ans) : (t.tol >= 0.05 ? (Math.round(t.ans * 10) / 10).toFixed(1) : (Math.round(t.ans * 100) / 100).toFixed(2)).replace('.', ',');
+  const fmt = x => String(Math.round(x * 10000) / 10000).replace('.', ',').replace('-', '−');
+  const showAns = t => t.show || (t.dec != null && !Number.isInteger(t.ans) ? t.ans.toFixed(t.dec).replace('.', ',').replace('-', '−') : fmt(t.ans));
 
   function reviewBlock(x) {
     const it = x.it;
@@ -560,12 +628,17 @@
   function collectEditor() {
     const f = $app.querySelector('form[data-form=topic]'); if (!f) return;
     const e = view.edit;
-    e.name = f.name.value.trim(); e.subject = f.subject.value; e.grade = +f.grade.value;
-    e.rows = e.rows.map((_, i) => [0, 1, 2, 3, 4, 5, 6].map(j => f['r' + i + '_' + j].value.trim()));
+    const el = f.elements;
+    e.name = el.namedItem('name').value.trim(); e.subject = el.namedItem('subject').value; e.grade = +el.namedItem('grade').value;
+    e.rows = e.rows.map((_, i) => [0, 1, 2, 3, 4, 5, 6].map(j => el.namedItem('r' + i + '_' + j).value.trim()));
   }
 
   /* ---------- Render ---------- */
   function render() {
+    // Schutz vor Zuständen, die es nicht geben darf (z. B. Quest-Karte ohne angelegten Helden, Quiz ohne Sitzung)
+    if (/^quest(map|prolog|level)$/.test(view.screen) && !S.quest[S.grade]) view.screen = S.grade ? 'questhero' : 'home';
+    if (view.screen === 'questhero' && !S.grade) view.screen = 'home';
+    if ((view.screen === 'quiz' || view.screen === 'result') && !sess) view.screen = 'home';
     const sc = view.screen;
     const body = { home: viewHome, subject: viewSubject, quiz: viewQuiz, result: viewResult, rewards: viewRewards, report: viewReport, friends: viewFriends, challenge: viewChallenge, testsetup: viewTestSetup, sheet: viewSheet, editor: viewEditor, editform: viewEditForm, questmap: viewQuestMap, questhero: viewQuestHero, questprolog: viewQuestProlog, questlevel: viewQuestLevel }[sc]();
     const tab = TAB[sc];
@@ -601,8 +674,10 @@
         const inp = $app.querySelector('input[name=a]'); if (!inp || inp.disabled) break;
         const s = inp.selectionStart == null ? inp.value.length : inp.selectionStart, en = inp.selectionEnd == null ? s : inp.selectionEnd;
         if (d.k === 'clr') inp.value = '';
-        else if (d.k === 'bs') { if (s !== en) inp.value = inp.value.slice(0, s) + inp.value.slice(en); else if (s > 0) { inp.value = inp.value.slice(0, s - 1) + inp.value.slice(s); inp.setSelectionRange(s - 1, s - 1); } }
+        else if (d.k === 'bs') { if (s !== en) { inp.value = inp.value.slice(0, s) + inp.value.slice(en); inp.setSelectionRange(s, s); } else if (s > 0) { inp.value = inp.value.slice(0, s - 1) + inp.value.slice(s); inp.setSelectionRange(s - 1, s - 1); } }
         else { inp.value = inp.value.slice(0, s) + d.k + inp.value.slice(en); inp.setSelectionRange(s + d.k.length, s + d.k.length); }
+        // Fokus zurück ins Feld (am Handy öffnet sich wegen inputmode="none" keine System-Tastatur)
+        const pos = inp.selectionStart; inp.focus({ preventScroll: true }); try { inp.setSelectionRange(pos, pos); } catch { /* egal */ }
         break;
       }
       case 'tab': go(d.id === 'tests' ? 'testsetup' : d.id); break;
@@ -615,16 +690,16 @@
       case 'train': startTrain(genById(d.id)); break;
       case 'answer': answer(+d.i); break;
       case 'next': next(); break;
-      case 'quit': if (confirm('Wirklich abbrechen? Dein Fortschritt in dieser Runde geht verloren.')) { sess = null; go('home'); } break;
+      case 'quit': goBack(); break;
       case 'again': startQuiz(sess.topic); break;
       case 'share': shareChallenge(); break;
       case 'accept': { const c = view.challenge; startQuiz(c.topic, { seed: c.seed, count: c.m, challenge: c }); break; }
-      case 'testsetup': view.testcfg = null; go('testsetup'); view.testcfg.subject = d.id; view.testcfg.cats = null; render(); break;
+      case 'testsetup': go('testsetup', { testcfg: { subject: d.id, grade: S.grade, cats: null, n: 15 } }); break;
       case 'tsubject': view.testcfg.subject = d.id; view.testcfg.cats = null; render(); break;
       case 'tn': view.testcfg.n = +d.n; render(); break;
       case 'starttest': { const c = view.testcfg; if (!c.cats.length) { toast('Wähle mindestens eine Kategorie.'); break; } startTest(c); break; }
-      case 'sheet': go('sheet', { sheet: { key: d.key || null, subject: d.subject || null }, back: view.screen }); break;
-      case 'back-subject': { const sh = view.sheet; const t = sh.key && topicByKey(sh.key); go(t ? 'subject' : 'subject', { subject: t ? t.subject : sh.subject }); break; }
+      case 'sheet': go('sheet', { sheet: { key: d.key || null, subject: d.subject || null, from: view.screen } }); break;
+      case 'back-subject': goBack(); break;
       case 'print': window.print(); break;
       case 'editor': go('editor'); break;
       case 'newtopic': go('editform', { edit: { id: null, subject: 'mathe', grade: S.grade || 5, name: '', rows: [emptyRow()] } }); break;
@@ -671,9 +746,12 @@
           let n = 0;
           list.forEach(t => {
             if (!t || !t.name || !Array.isArray(t.rows)) return;
-            const rows = t.rows.filter(r => Array.isArray(r) && r.length >= 5 && r.slice(0, 5).every(x => typeof x === 'string' && x)).map(r => [0, 1, 2, 3, 4, 5, 6].map(j => String(r[j] || '').slice(0, 400)));
+            // Nur vollständige Fragen mit vier verschiedenen Antworten übernehmen
+            const rows = t.rows.filter(r => Array.isArray(r) && r.length >= 5 && r.slice(0, 5).every(x => typeof x === 'string' && x.trim()) && new Set(r.slice(1, 5).map(x => x.trim())).size === 4).map(r => [0, 1, 2, 3, 4, 5, 6].map(j => String(r[j] || '').trim().slice(0, 400)));
             if (!rows.length) return;
-            S.custom.push({ id: Date.now().toString(36) + (n++), subject: String(t.subject || 'eigene'), grade: L.grades.includes(+t.grade) ? +t.grade : 5, name: String(t.name).slice(0, 60), rows });
+            // Unbekannte Fächer landen unter „Eigene Themen“, sonst wären sie auf der Startseite unsichtbar
+            const subject = L.subjects.some(s => s.id === t.subject) ? t.subject : 'eigene';
+            S.custom.push({ id: Date.now().toString(36) + (n++), subject, grade: L.grades.includes(+t.grade) ? +t.grade : (S.grade || 5), name: String(t.name).slice(0, 60), rows });
           });
           save(); rebuildCustom(); render(); toast(n + ' Thema/Themen importiert.');
         } catch { toast('Datei konnte nicht gelesen werden.'); }
@@ -690,12 +768,26 @@
   function fromHash() {
     const m = location.hash.match(/^#c=(.+)$/); if (!m) return;
     const c = dec(m[1]);
-    history.replaceState(null, '', baseUrl());
+    history.replaceState(history.state, '', baseUrl());
     if (c) { if (!S.grade) S.grade = c.topic.grade; go('challenge', { challenge: c }); } else toast('Dieser Challenge-Link ist ungültig.');
   }
   window.addEventListener('hashchange', fromHash);
 
+  // Prüf-Funktionen für eigene Tests (z. B. in der Browser-Konsole): LERN.util.isRight(aufgabe, 'eingabe')
+  L.util = { parseNum, isRight, showAns };
+
   render();
   fromHash();
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { });
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    // Wenn im Hintergrund eine neue App-Version geladen wurde, einen Hinweis zum Neuladen zeigen
+    const hadWorker = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadWorker || document.querySelector('.update')) return;
+      const el = document.createElement('div'); el.className = 'toast update no-print'; el.setAttribute('role', 'status');
+      el.innerHTML = '<span>Neue Version von LernQuest verfügbar.</span><button class="btn">Neu laden</button>';
+      el.querySelector('button').addEventListener('click', () => location.reload());
+      document.body.appendChild(el);
+    });
+    navigator.serviceWorker.register('sw.js').catch(() => { });
+  }
 })();

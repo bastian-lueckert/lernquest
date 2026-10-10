@@ -87,7 +87,7 @@ LERN.add('mathe', 9, 'quadratisch', 'Quadratische Funktionen & Gleichungen', [
   ['Wie öffnet sich die Parabel y = −x²?', 'Nach unten', 'Nach oben', 'Nach rechts', 'Gar nicht', 'Ein negativer Vorfaktor spiegelt die Parabel an der x-Achse.', 'Wie der Bogen eines Wasserstrahls im Springbrunnen.'],
   ['Löse x² = 49.', 'x = 7 oder x = −7', 'x = 7', 'x = 24,5', 'x = −7', 'Es gibt zwei Lösungen: 7² = 49 und (−7)² = 49.', 'Quadratische Gleichungen haben bis zu zwei Lösungen.'],
   ['Löse x² − 5x + 6 = 0.', 'x = 2 oder x = 3', 'x = −2 oder x = −3', 'x = 1 oder x = 6', 'x = 5 oder x = 6', 'Faktorisieren: (x − 2)(x − 3) = 0, denn 2 + 3 = 5 und 2 · 3 = 6 (Satz von Vieta).', 'Zwei Zahlen mit Summe 5 und Produkt 6 sind 2 und 3.'],
-  ['Wenn die Diskriminante D < 0 ist, …', 'gibt es keine reelle Lösung', 'gibt es genau eine Lösung', 'gibt es zwei Lösungen', 'ist die Lösung 0', 'Unter der Wurzel steht eine negative Zahl – im Reellen nicht lösbar. Die Parabel schneidet die x-Achse nicht.', 'Ein Ball, der die Höhe 0 nie erreicht, landet nie auf dem Boden – etwa bei einer zu niedrigen Wurfbahn im Modell.'],
+  ['Wenn die Diskriminante D < 0 ist, …', 'gibt es keine reelle Lösung', 'gibt es genau eine Lösung', 'gibt es zwei Lösungen', 'ist die Lösung 0', 'Unter der Wurzel steht eine negative Zahl – im Reellen nicht lösbar. Die Parabel schneidet die x-Achse nicht.', 'Die Parabel y = x² + 1 liegt komplett über der x-Achse – sie hat keine Nullstelle.'],
   ['Löse mit der p-q-Formel: x² + 4x − 5 = 0', 'x = 1 oder x = −5', 'x = −1 oder x = 5', 'x = 2 oder x = −2', 'x = 4 oder x = −5', 'x = −2 ± √(4 + 5) = −2 ± 3 → 1 und −5.', 'Probe: 1 + 4 − 5 = 0 ✓.']
 ]);
 
@@ -95,7 +95,7 @@ LERN.add('mathe', 10, 'trigonometrie', 'Trigonometrie', [
   ['Wie ist sin α im rechtwinkligen Dreieck definiert?', 'Gegenkathete : Hypotenuse', 'Ankathete : Hypotenuse', 'Gegenkathete : Ankathete', 'Hypotenuse : Gegenkathete', 'SOH: Sinus = Gegenkathete / Hypotenuse.', 'Merkhilfe: „SOH-CAH-TOA“.'],
   ['Wie ist cos α definiert?', 'Ankathete : Hypotenuse', 'Gegenkathete : Hypotenuse', 'Gegenkathete : Ankathete', 'Ankathete : Gegenkathete', 'CAH: Cosinus = Ankathete / Hypotenuse.', 'Bei flachen Winkeln ist cos nahe 1: Die Ankathete ist fast so lang wie die Hypotenuse.'],
   ['Wie ist tan α definiert?', 'Gegenkathete : Ankathete', 'Ankathete : Gegenkathete', 'Gegenkathete : Hypotenuse', 'Hypotenuse : Ankathete', 'TOA: Tangens = Gegenkathete / Ankathete.', 'Die Steigung einer Straße ist der Tangens ihres Neigungswinkels.'],
-  ['Wie groß ist sin 30°?', '0,5', '1', '0,866', '0', 'Das ist ein Standardwert: sin 30° = 1/2.', 'Ein Seil im 30°-Winkel trägt auf halber Seillänge die Höhe.'],
+  ['Wie groß ist sin 30°?', '0,5', '1', '0,866', '0', 'Das ist ein Standardwert: sin 30° = 1/2.', 'Eine 10 m lange Rampe mit 30° Neigung überwindet genau 5 m Höhe.'],
   ['Eine 6 m lange Leiter lehnt im 60°-Winkel an der Wand. Wie hoch reicht sie ungefähr?', '5,2 m', '3 m', '6 m', '10,4 m', 'h = 6 · sin 60° ≈ 6 · 0,866 ≈ 5,2 m.', 'So planst du Leiterhöhen für Dacharbeiten.'],
   ['Wie groß ist α, wenn tan α = 1?', '45°', '30°', '60°', '90°', 'Gegen- und Ankathete sind gleich lang → gleichschenklig-rechtwinkliges Dreieck mit 45°.', 'Eine Rampe mit 100 % Steigung hat 45°.']
 ]);

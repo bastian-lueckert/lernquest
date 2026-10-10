@@ -25,7 +25,7 @@ LERN.add('musik', 8, 'stile', 'Epochen & Popmusik', [
   ['Was ist ein Blues-Schema?', '12-taktige Akkordfolge', '8-taktiger Kanon', 'Ein Walzertakt', 'Eine Fuge', 'Typisch: Tonika, Subdominante, Dominante.', 'Viele Rocksongs nutzen das Schema.'],
   ['Wer prägte die Romantik in der Musik?', 'Schubert und Chopin', 'Bach und Händel', 'Gregor und Palestrina', 'Mozart und Haydn', 'Romantik betont Gefühl und Ausdruck.', 'Chopin schrieb viele Klavierstücke.'],
   ['Wie nennt man mehrstimmig gleichzeitig gespielte Melodien?', 'Polyphonie', 'Monophonie', 'Rhythmus', 'Dynamik', 'Polyphon = mehrere gleichwertige Stimmen.', 'Ein Kanon wie „Bruder Jakob“.'],
-  ['Wie viele Töne umfasst eine Oktave?', '8 (von c bis c)', '5', '12', '3', 'Das Intervall von einem Ton zum gleichen Ton, aber höher oder tiefer.', 'Männer- und Frauenstimmen singen oft im Oktavabstand.']
+  ['Wie viele Stammtöne umfasst eine Oktave, wenn man von c bis zum nächsten c zählt?', '8', '5', '6', '3', 'Das Intervall von einem Ton zum gleichen Ton, aber höher oder tiefer.', 'Männer- und Frauenstimmen singen oft im Oktavabstand.']
 ]);
 
 /* ===== Kunst ===== */

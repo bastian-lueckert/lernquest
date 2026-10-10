@@ -11,7 +11,7 @@ LERN.add('englisch', 6, 'alltag', 'Everyday English', [
   ['What does "Nice to meet you" mean?', 'Freut mich, dich kennenzulernen', 'Bis morgen', 'Danke schön', 'Entschuldigung', 'Begrüßungsformel beim ersten Treffen.', 'Die typische Antwort: "Nice to meet you, too."'],
   ['What is the plural of "child"?', 'children', 'childs', 'childes', 'childen', 'Unregelmäßiger Plural: child → children, man → men.', '"There are twenty children in my class."'],
   ['Which word means "Schule"?', 'school', 'shool', 'skool', 'scool', 'Das „ch“ wird wie k gesprochen: [skuːl].', '"I go to school at 8 o\'clock."'],
-  ['What time is it? 3:30', 'It\'s half past three.', 'It\'s half three.', 'It\'s three past half.', 'It\'s thirty to three.', '„half past three“ bedeutet drei Uhr dreißig.', '"It\'s a quarter to four" = 3:45.']
+  ['What time is it? 3:30', 'It\'s half past three.', 'It\'s half to three.', 'It\'s three past half.', 'It\'s thirty to three.', '„half past three“ bedeutet drei Uhr dreißig.', '"It\'s a quarter to four" = 3:45.']
 ]);
 
 LERN.add('englisch', 7, 'present-perfect', 'Present Perfect', [

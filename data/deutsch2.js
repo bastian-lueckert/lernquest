@@ -24,8 +24,8 @@ LERN.add('deutsch', 6, 'textarten', 'Textarten & Märchen', [
 
 LERN.add('deutsch', 7, 'stilmittel', 'Sprachliche Mittel', [
   ['Was ist ein Vergleich?', 'Verbindung zweier Dinge mit „wie“ oder „als“', 'Gleichsetzung ohne „wie“', 'Übertreibung', 'Wiederholung eines Wortes', '„Er ist stark wie ein Bär.“', 'Ein Vergleich macht Beschreibungen anschaulich.'],
-  ['Was ist eine Metapher?', 'Bildhafte Übertragung ohne „wie“', 'Ein Reimschema', 'Eine Frage', 'Ein Fremdwort', '„Der Wolkenkratzer kratzt am Himmel“ – Bedeutung wird übertragen.', '„Zeitdieb“ für etwas, das Zeit kostet.'],
-  ['Wie nennt man die Vermenschlichung von Dingen?', 'Personifikation', 'Alliteration', 'Ellipse', 'Hyperbel', 'Gegenstände handeln wie Menschen: „Die Sonne lacht.“', 'In Werbung: „Mein Auto schnurrt wie ein Kätzchen.“'],
+  ['Was ist eine Metapher?', 'Bildhafte Übertragung ohne „wie“', 'Ein Reimschema', 'Eine Frage', 'Ein Fremdwort', '„Er ist ein Fuchs.“ – Die Schlauheit des Fuchses wird auf den Menschen übertragen, ganz ohne „wie“.', '„Zeitdieb“ für etwas, das Zeit kostet.'],
+  ['Wie nennt man die Vermenschlichung von Dingen?', 'Personifikation', 'Alliteration', 'Ellipse', 'Hyperbel', 'Gegenstände handeln wie Menschen: „Die Sonne lacht.“', 'Weitere Beispiele: „Der Wind flüstert“, „Die Zeit rennt“.'],
   ['Was ist eine Alliteration?', 'Wörter mit gleichem Anfangslaut', 'Ein Satz ohne Verb', 'Ein Wortspiel mit Zahlen', 'Ein Reim am Zeilenende', '„Milch macht müde Männer munter.“', 'Zungenbrecher leben von Alliteration.'],
   ['Was ist eine Hyperbel?', 'Starke Übertreibung', 'Untertreibung', 'Reim', 'Satzbau-Fehler', '„Ich habe tausendmal angerufen.“', 'Umgangssprache nutzt Hyperbeln ständig.']
 ]);
