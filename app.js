@@ -48,11 +48,30 @@
   L.base = L.topics.slice();
   L.base.forEach(t => { if (t.grade0 == null) t.grade0 = t.grade; });
   A.linkAlts(L.base);
+  // Eigene Vokabelliste: aus den Paaren entstehen Auswahl-, Tipp- und Zuordnungsaufgaben
+  function addVocab(c) {
+    const key = 'custom-' + c.id;
+    const t = L.pairs(c.subject, c.grade, c.id, c.name, { q: 'Übersetze: „{0}“', qr: 'Was bedeutet „{1}“?', e: '{0} = {1}', ty: 1, tm: 'strict' }, c.pairs);
+    Object.assign(t, { key, custom: true, vocab: true });
+    t.qs.forEach((q, i) => { q.id = key + '-' + i; q.topicKey = key; });
+  }
+  // Liest „deutsch = Fremdsprache“ (auch mit ; Tabulator oder Gedankenstrich), eine Vokabel pro Zeile; Doppelte fallen weg
+  function parseVocab(text) {
+    const out = [], l = new Set(), r = new Set();
+    String(text).split('\n').forEach(line => {
+      const m = line.match(/^(.+?)\s*(?:=|;|\t|\s[-–—]\s)\s*(.+)$/);
+      if (!m) return;
+      const a = m[1].trim().slice(0, 60), b = m[2].trim().slice(0, 60);
+      if (!a || !b || l.has(a.toLowerCase()) || r.has(b.toLowerCase()) || out.length >= 200) return;
+      l.add(a.toLowerCase()); r.add(b.toLowerCase()); out.push([a, b]);
+    });
+    return out;
+  }
   function rebuildCustom() {
     // Themen, die die eigene Schule in einem anderen Jahr behandelt, stehen in S.gradeOv
     L.base.forEach(t => { const o = own(S.gradeOv, t.key) ? +S.gradeOv[t.key] : 0; t.grade = L.grades.includes(o) ? o : t.grade0; });
     L.topics = L.base.slice();
-    S.custom.forEach(c => L.topics.push({
+    S.custom.forEach(c => c.kind === 'vocab' ? addVocab(c) : L.topics.push({
       key: 'custom-' + c.id, subject: c.subject, grade: c.grade, id: c.id, name: c.name, custom: true,
       qs: c.rows.map((r, i) => ({ id: 'custom-' + c.id + '-' + i, subject: c.subject, topicKey: 'custom-' + c.id, q: r[0], a: r[1], w: [r[2], r[3], r[4]], e: r[5] || 'Eigene Frage.', ex: r[6] || '–' }))
     }));
@@ -175,7 +194,7 @@
 
   /* Anwendungsaufgaben: selbst schreiben, zuordnen, ordnen */
   const canApply = t => {
-    if (t._app == null) t._app = !t.custom && t.qs.filter(q => q.ty).length + (A.buildMatch(t, Math.random) ? 3 : 0) >= 3;
+    if (t._app == null) t._app = (!t.custom || t.vocab) && t.qs.filter(q => q.ty).length + (A.buildMatch(t, Math.random) ? 3 : 0) >= 3;
     return t._app;
   };
   function applyItems(topics, n) {
@@ -709,6 +728,10 @@
     // Rückmeldung nach der Antwort; im Probetest gibt es die Auflösung erst am Ende
     const fb = (good, bad, body) => !answered ? '' : test ? `<div class="fb neutral" aria-live="polite"><b>Antwort gespeichert</b><p>Die Auswertung bekommst du am Ende.</p>${nextBtn}</div>` : `<div class="fb ${last.ok ? 'good' : 'bad'}" aria-live="polite"><b>${last.ok ? good : bad}</b>${body()}${nextBtn}</div>`;
     const rv = it.review ? '<span class="tag">🔁 Wiederholung</span> ' : '';
+    // Tipps (nicht im Probetest): bei Rechenaufgaben die ersten Rechenschritte, beim Schreiben Anfangsbuchstabe und Wortanfang
+    const sol = it.kind === 'type' ? A.shown(it.q.ty) : '';
+    const hintMax = test ? 0 : it.kind === 'num' ? it.t.steps.length - 1 : it.kind === 'type' ? (sol.length > 3 ? 2 : sol.length > 1 ? 1 : 0) : 0, hN = Math.min(it.hints || 0, hintMax);
+    const hintBtn = !answered && hN < hintMax ? `<button type="button" class="btn ghost" data-act="hint">💡 ${hN ? 'Noch ein Tipp' : 'Tipp'}</button>` : '';
 
     if (it.kind === 'mc') {
       const right = it.opts.find(o => o.ok).t;
@@ -725,9 +748,10 @@
       const q = it.q, ty = q.ty, prompt = ty.prompt || q.q;
       const hint = ty.mode === 'exact' && !/Groß/.test(prompt) ? '<p class="hint">Achte auf Groß- und Kleinschreibung.</p>' : '';
       return `${bar}<section class="card q">${rv}<span class="tag app">✍️ Selbst schreiben</span><h2 class="qtext">${esc(prompt)}</h2>
-        <form class="typeform" data-form="type"><div class="numrow"><input name="a" class="txt" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Deine Antwort" aria-label="Antwort" ${answered ? 'disabled value="' + esc(p) + '"' : ''}>${answered ? '' : '<button class="btn">Prüfen</button>'}</div>
+        <form class="typeform" data-form="type"><div class="numrow"><input name="a" class="txt" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Deine Antwort" aria-label="Antwort" ${answered ? 'disabled value="' + esc(p) + '"' : 'value="' + esc(it.draft || '') + '"'}>${answered ? '' : '<button class="btn">Prüfen</button>'}</div>
           ${!answered && q.subject === 'franzoesisch' ? `<div class="acc" role="group" aria-label="Sonderzeichen">${ACCENTS.map(k => `<button type="button" class="key sm" data-act="key" data-k="${k}">${k}</button>`).join('')}</div>` : ''}
-          ${answered ? '' : hint + '<div class="btns" style="margin-top:10px"><button type="button" class="btn ghost" data-act="skip">Weiß ich nicht</button></div>'}</form>
+          ${!answered && hN ? `<div class="tip"><b>💡 Tipp</b><p>Beginnt mit „${esc(sol[0])}“ – ${sol.trim().split(/\s+/).length > 1 ? sol.trim().split(/\s+/).length + ' Wörter, ' : ''}${sol.replace(/\s/g, '').length} Zeichen.</p>${hN > 1 ? `<p>Anfang: „${esc(sol.slice(0, Math.ceil(sol.length / 2)))}…“</p>` : ''}</div>` : ''}
+          ${answered ? '' : hint + '<div class="btns" style="margin-top:10px">' + hintBtn + '<button type="button" class="btn ghost" data-act="skip">Weiß ich nicht</button></div>'}</form>
         ${fb('🎉 Richtig! +10 XP', '💡 Leider falsch', () => `${last.ok ? (last.note ? `<p>${esc(last.note)}</p>` : '') : `<p>Richtig ist: <strong>${esc(A.shown(ty))}</strong></p>`}<p>${esc(q.e)}</p>${exP(q, 'Zum Beispiel')}`)}</section>`;
     }
 
@@ -759,8 +783,8 @@
 
     const t = it.t;
     return `${bar}<section class="card q"><span class="tag">🧮 ${esc(it.g.name)}</span><h2 class="qtext">${esc(t.q)}</h2>${t.fig ? `<div class="fig">${t.fig}</div>` : ''}
-      <form class="numform" data-form="num"><div class="numrow"><input name="a" inputmode="${COARSE ? 'none' : 'decimal'}" autocomplete="off" autocapitalize="off" placeholder="Deine Antwort" aria-label="Antwort" ${answered ? 'disabled value="' + esc(p) + '"' : ''}><span class="unit">${esc(t.unit || '')}</span></div>
-        ${answered ? '' : `<div class="keypad" role="group" aria-label="Zahlentastatur">${[['7', '7'], ['8', '8'], ['9', '9'], ['bs', '⌫'], ['4', '4'], ['5', '5'], ['6', '6'], ['clr', 'C'], ['1', '1'], ['2', '2'], ['3', '3'], ['/', '/'], ['−', '−'], ['0', '0'], [',', ','], ['ok', '✓']].map(([k, l]) => k === 'ok' ? `<button class="key ok" aria-label="Prüfen">${l}</button>` : `<button type="button" class="key ${k === 'bs' || k === 'clr' ? 'ctl' : /\d/.test(k) ? '' : 'op'}" data-act="key" data-k="${k}" aria-label="${k === 'bs' ? 'Löschen' : k === 'clr' ? 'Alles löschen' : k === '/' ? 'Bruchstrich' : k === '−' ? 'Minus' : k === ',' ? 'Komma' : k}">${l}</button>`).join('')}</div><p class="hint">Brüche: <b>3/4</b> · Dezimalzahlen mit Komma: <b>0,75</b> · negative Zahlen mit <b>−</b></p>`}</form>
+      <form class="numform" data-form="num"><div class="numrow"><input name="a" inputmode="${COARSE ? 'none' : 'decimal'}" autocomplete="off" autocapitalize="off" placeholder="Deine Antwort" aria-label="Antwort" ${answered ? 'disabled value="' + esc(p) + '"' : 'value="' + esc(it.draft || '') + '"'}><span class="unit">${esc(t.unit || '')}</span></div>
+        ${answered ? '' : `<div class="keypad" role="group" aria-label="Zahlentastatur">${[['7', '7'], ['8', '8'], ['9', '9'], ['bs', '⌫'], ['4', '4'], ['5', '5'], ['6', '6'], ['clr', 'C'], ['1', '1'], ['2', '2'], ['3', '3'], ['/', '/'], ['−', '−'], ['0', '0'], [',', ','], ['ok', '✓']].map(([k, l]) => k === 'ok' ? `<button class="key ok" aria-label="Prüfen">${l}</button>` : `<button type="button" class="key ${k === 'bs' || k === 'clr' ? 'ctl' : /\d/.test(k) ? '' : 'op'}" data-act="key" data-k="${k}" aria-label="${k === 'bs' ? 'Löschen' : k === 'clr' ? 'Alles löschen' : k === '/' ? 'Bruchstrich' : k === '−' ? 'Minus' : k === ',' ? 'Komma' : k}">${l}</button>`).join('')}</div><p class="hint">Brüche: <b>3/4</b> · Dezimalzahlen mit Komma: <b>0,75</b> · negative Zahlen mit <b>−</b></p>${hN ? `<div class="tip"><b>💡 Tipp</b><ol class="steps">${t.steps.slice(0, hN).map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>` : ''}${hintBtn ? `<div class="btns" style="margin-top:10px">${hintBtn}</div>` : ''}`}</form>
       ${fb('🎉 Richtig! +10 XP', '💡 Nicht ganz', () => `<p>Richtig ist: <strong>${esc(showAns(t))} ${esc(t.unit || '')}</strong></p><p>So rechnest du:</p><ol class="steps">${t.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`)}</section>`;
   }
 
@@ -915,13 +939,27 @@
   function viewEditor() {
     return `<div class="bar-top no-print"><button class="back" data-act="home" aria-label="Zurück">←</button><h2>✏️ Eigene Themen</h2></div>
       <p class="hint">Eigene Themen werden nur in diesem Browser gespeichert (nicht auf GitHub). Sichere sie über „Exportieren“.</p>
-      <div class="btns"><button class="btn" data-act="newtopic">+ Neues Thema</button></div>
-      ${S.custom.length ? S.custom.map(c => `<article class="card topic"><div><h3>${esc(c.name)}</h3><small>${esc(subj(c.subject).name)} · Klasse ${c.grade} · ${c.rows.length} Fragen</small></div><div class="btns"><button class="btn" data-act="start" data-key="custom-${c.id}">Quiz</button><button class="btn ghost" data-act="edittopic" data-id="${c.id}">Bearbeiten</button><button class="btn ghost" data-act="deltopic" data-id="${c.id}">🗑️</button></div></article>`).join('') : '<div class="card empty">Noch keine eigenen Themen.</div>'}
+      <p class="hint">Mit einer <b>Vokabelliste</b> übst du die Wörter aus deinem Buch: Aus jeder Liste entstehen Quiz, Aufgaben zum Selbstschreiben und Zuordnungen.</p>
+      <div class="btns"><button class="btn" data-act="newtopic">+ Neues Thema</button><button class="btn alt" data-act="newvocab">+ Vokabelliste</button></div>
+      ${S.custom.length ? S.custom.map(c => `<article class="card topic"><div><h3>${esc(c.name)}</h3><small>${esc(subj(c.subject).name)} · Klasse ${c.grade} · ${c.kind === 'vocab' ? c.pairs.length + ' Vokabeln' : c.rows.length + ' Fragen'}</small></div><div class="btns"><button class="btn" data-act="start" data-key="custom-${c.id}">Quiz</button>${c.kind === 'vocab' ? `<button class="btn alt" data-act="apply" data-key="custom-${c.id}">✍️ Anwenden</button>` : ''}<button class="btn ghost" data-act="edittopic" data-id="${c.id}">Bearbeiten</button><button class="btn ghost" data-act="deltopic" data-id="${c.id}">🗑️</button></div></article>`).join('') : '<div class="card empty">Noch keine eigenen Themen.</div>'}
       <section class="card"><h3>Sichern & Teilen</h3><div class="btns"><button class="btn ghost" data-act="exportfile">⬇️ Exportieren (Datei)</button><label class="btn ghost filebtn">⬆️ Importieren<input type="file" accept="application/json,.json" data-file="import" hidden></label></div></section>`;
   }
   const emptyRow = () => ['', '', '', '', '', '', ''];
+  function viewVocabForm() {
+    const e = view.edit;
+    const subs = L.subjects.filter(s => s.id !== 'eigene').concat([{ id: 'eigene', name: 'Eigene Themen / Sonstiges' }]);
+    return `<div class="bar-top no-print"><button class="back" data-act="editor" aria-label="Zurück">←</button><h2>${e.id ? 'Vokabelliste bearbeiten' : 'Neue Vokabelliste'}</h2></div>
+      <form data-form="vocab" class="editor">
+        <section class="card"><label>Titel<input name="name" maxlength="60" required value="${esc(e.name)}" placeholder="z. B. Unit 3 – At school"></label>
+        <div class="two"><label>Fach<select name="subject">${subs.map(s => `<option value="${s.id}" ${s.id === e.subject ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>
+        <label>Klasse<select name="grade">${L.grades.map(g => `<option ${g === e.grade ? 'selected' : ''}>${g}</option>`).join('')}</select></label></div></section>
+        <section class="card"><label>Vokabeln – eine pro Zeile: <code>deutsch = Fremdsprache</code><textarea name="list" rows="12" placeholder="die Schule = school&#10;der Lehrer = teacher&#10;lernen = to learn&#10;das Heft = exercise book">${esc(e.text)}</textarea></label>
+        <p class="hint">Mindestens 4 Vokabeln. Statt <code>=</code> geht auch ein Semikolon, ein Tabulator (Kopieren aus einer Tabelle) oder „ – “. Beim Selbstschreiben wird die rechte Seite abgefragt; Artikel wie „the“, „le“ oder „la“ dürfen fehlen.</p></section>
+        <div class="btns"><button class="btn">💾 Speichern</button></div></form>`;
+  }
   function viewEditForm() {
     const e = view.edit;
+    if (e.kind === 'vocab') return viewVocabForm();
     const subs = L.subjects.filter(s => s.id !== 'eigene').concat([{ id: 'eigene', name: 'Eigene Themen / Sonstiges', icon: '✏️' }]);
     return `<div class="bar-top no-print"><button class="back" data-act="editor" aria-label="Zurück">←</button><h2>${e.id ? 'Thema bearbeiten' : 'Neues Thema'}</h2></div>
       <form data-form="topic" class="editor">
@@ -1018,6 +1056,11 @@
       case 'train': startTrain(genById(d.id)); break;
       case 'answer': answer(+d.i); break;
       case 'skip': answerType('', true); break;
+      case 'hint': {
+        const it = sess && sess.picked == null ? sess.items[sess.i] : null; if (!it) break;
+        const inp = $app.querySelector('input[name=a]'); if (inp) it.draft = inp.value;     // schon Getipptes behalten
+        it.hints = (it.hints || 0) + 1; render(); break;
+      }
       case 'ml': matchTap('l', +d.i); break;
       case 'mr': matchTap('r', +d.i); break;
       case 'mcheck': matchCheck(); break;
@@ -1044,7 +1087,8 @@
       case 'print': window.print(); break;
       case 'editor': go('editor'); break;
       case 'newtopic': go('editform', { edit: { id: null, subject: 'mathe', grade: S.grade || 5, name: '', rows: [emptyRow()] } }); break;
-      case 'edittopic': { const c = S.custom.find(x => x.id === d.id); go('editform', { edit: { id: c.id, subject: c.subject, grade: c.grade, name: c.name, rows: c.rows.map(r => r.slice()) } }); break; }
+      case 'newvocab': go('editform', { edit: { kind: 'vocab', id: null, subject: 'englisch', grade: S.grade || 5, name: '', text: '' } }); break;
+      case 'edittopic': { const c = S.custom.find(x => x.id === d.id); if (c.kind === 'vocab') { go('editform', { edit: { kind: 'vocab', id: c.id, subject: c.subject, grade: c.grade, name: c.name, text: c.pairs.map(p => p[0] + ' = ' + p[1]).join('\n') } }); break; } go('editform', { edit: { id: c.id, subject: c.subject, grade: c.grade, name: c.name, rows: c.rows.map(r => r.slice()) } }); break; }
       case 'deltopic': if (confirm('Dieses Thema wirklich löschen?')) { S.custom = S.custom.filter(x => x.id !== d.id); save(); rebuildCustom(); render(); } break;
       case 'addrow': collectEditor(); view.edit.rows.push(emptyRow()); render(); break;
       case 'delrow': collectEditor(); view.edit.rows.splice(+d.i, 1); if (!view.edit.rows.length) view.edit.rows.push(emptyRow()); render(); break;
@@ -1088,6 +1132,17 @@
       S.quest[S.grade] = { hero: { name, emoji: (f.querySelector('input[name=e]:checked') || {}).value || '🧙' }, done: {}, s2: {}, s3: {} };
       save(); go('questprolog');
     }
+    if (k === 'vocab') {
+      const e = view.edit;
+      Object.assign(e, { name: el.namedItem('name').value.trim(), subject: el.namedItem('subject').value, grade: +el.namedItem('grade').value, text: el.namedItem('list').value });
+      const pairs = parseVocab(e.text);
+      if (!e.name) { toast('Bitte einen Titel eingeben.'); return; }
+      if (pairs.length < 4) { toast('Bitte mindestens 4 verschiedene Vokabeln eintragen – eine pro Zeile: deutsch = Fremdsprache.'); return; }
+      const rec = { id: e.id || Date.now().toString(36), kind: 'vocab', subject: e.subject, grade: e.grade, name: e.name, pairs, rows: [] };
+      const i = S.custom.findIndex(c => c.id === rec.id);
+      if (i >= 0) S.custom[i] = rec; else S.custom.push(rec);
+      save(); rebuildCustom(); toast(pairs.length + ' Vokabeln gespeichert ✓'); go('editor');
+    }
     if (k === 'topic') { collectEditor(); if (saveTopic(view.edit)) { toast('Gespeichert ✓'); go('editor'); } }
   });
   $app.addEventListener('change', e => {
@@ -1101,6 +1156,11 @@
           const o = JSON.parse(txt); const list = Array.isArray(o) ? o : o.topics;
           let n = 0;
           list.forEach(t => {
+            if (t && t.kind === 'vocab' && t.name && Array.isArray(t.pairs)) {
+              const pairs = parseVocab(t.pairs.filter(p => Array.isArray(p) && p.length >= 2).map(p => String(p[0]).replace(/[=;\n]/g, ' ') + ' = ' + String(p[1]).replace(/\n/g, ' ')).join('\n'));
+              if (pairs.length >= 4) S.custom.push({ id: Date.now().toString(36) + (n++), kind: 'vocab', subject: L.subjects.some(s => s.id === t.subject) ? t.subject : 'eigene', grade: L.grades.includes(+t.grade) ? +t.grade : (S.grade || 5), name: String(t.name).slice(0, 60), pairs, rows: [] });
+              return;
+            }
             if (!t || !t.name || !Array.isArray(t.rows)) return;
             // Nur vollständige Fragen mit vier verschiedenen Antworten übernehmen
             const rows = t.rows.filter(r => Array.isArray(r) && r.length >= 5 && r.slice(0, 5).every(x => typeof x === 'string' && x.trim()) && new Set(r.slice(1, 5).map(x => x.trim())).size === 4).map(r => [0, 1, 2, 3, 4, 5, 6].map(j => String(r[j] || '').trim().slice(0, 400)));

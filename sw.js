@@ -1,4 +1,4 @@
-const CACHE = 'lernquest-v7';
+const CACHE = 'lernquest-v8';
 /*DATA:START*/ const DATA = ['data/content.js', 'data/cards.js', 'data/deutsch.js', 'data/deutsch2.js', 'data/englisch.js', 'data/englisch2.js', 'data/gesellschaft.js', 'data/kreativ.js', 'data/mathe.js', 'data/mathe2.js', 'data/naturwissenschaften.js', 'data/nw2.js', 'data/technik-sprachen.js', 'data/x-biologie.js', 'data/x-deutsch.js', 'data/x-englisch.js', 'data/x-erdkunde.js', 'data/x-extra.js', 'data/x-franzoesisch-latein.js', 'data/x-geschichte.js', 'data/x-informatik.js', 'data/x-mathe.js', 'data/x-musik-kunst.js', 'data/x-physik-chemie.js', 'data/x-politik-religion.js', 'data/y-cloze.js', ]; /*DATA:END*/
 const FILES = ['./', 'index.html', 'style.css', 'app.js', 'apply.js', 'lehrplan.js', 'quest-story.js', 'gen.js', 'diagrams.js', 'manifest.webmanifest', 'icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png', ...DATA];
 

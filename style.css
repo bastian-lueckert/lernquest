@@ -255,3 +255,8 @@ button.chip:hover{background:rgba(255,255,255,.32)}
 .chron{display:flex;gap:12px;align-items:flex-start}.chron>div{flex:1}.chron .story{margin-top:6px}
 .hero-card small+small{margin-top:2px}
 @media(max-width:420px){.slot{width:74px}}
+
+/* ---- Tipp vor der Lösung ---- */
+.tip{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--popbg);color:var(--popink)}
+.tip p{margin-top:4px}.tip .steps{margin-top:4px}
+.editor textarea{resize:vertical}

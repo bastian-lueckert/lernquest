@@ -19,7 +19,8 @@ Quiz-Lern-App für das Gymnasium in NRW (Klasse 5–10). Läuft komplett im Brow
 - **Lernzettel zum Ausdrucken** (pro Thema oder pro Fach) mit Merkbild bzw. Vokabelliste.
 - **Merkbilder:** selbst erzeugte SVG-Grafiken zu vielen Themen; für alle anderen Themen eine Schlüsselbegriff-Grafik.
 - **Report:** Trefferquote nach Fach und Thema, Schwachstellen, Probetest-Verlauf.
-- **Eigene Themen** im Editor (einzeln oder per Schnell-Import), lokal gespeichert, Export/Import als Datei.
+- **Eigene Themen** im Editor (einzeln oder per Schnell-Import) und **eigene Vokabellisten** („deutsch = Fremdsprache“, eine pro Zeile): Aus einer Liste entstehen Quiz, Aufgaben zum Selbstschreiben und Zuordnungen. Lokal gespeichert, Export/Import als Datei.
+- **Tipp vor der Lösung:** Bei Rechenaufgaben lassen sich die Rechenschritte einzeln aufdecken, beim Selbstschreiben Anfangsbuchstabe und Wortanfang (nicht im Probetest).
 - **Quest-Modus** pro Klasse mit durchgehender Geschichte: Jedes Fach hat einen Gegner und **drei Stufen** (1: Auswahlfragen, 2: zur Hälfte Anwendungsaufgaben, 3: Meisterprüfung). Für jede Stufe gibt es einen Stern und ein **Sammelstück** (Kristall, Ausrüstung, Begleiter). **Joker** und **Heiltränke** helfen im Kampf. Zwischenkapitel, Chronik zum Nachlesen und ein geheimes Ende für alle Sterne.
 - **Belohnungen** (XP, Level, Tagesziel, Serie, Abzeichen) und **Freunde-Challenge** per Link.
 - **Hell/Dunkel-Schalter** oben rechts (ohne eigene Wahl folgt die App dem Gerät).
