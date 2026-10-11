@@ -10,7 +10,7 @@
   const f2 = x => (Math.round(x * 100) / 100).toFixed(2).replace('.', ',').replace('-', '−');
   const sg = x => x < 0 ? '(' + f(x) + ')' : f(x);
   const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
-  const add = (id, subject, grade, name, make) => G.push({ id, subject, grade, name, make });
+  const add = (id, subject, grade, name, make, sach) => G.push({ id, subject, grade, name, make, sach: !!sach });
   const PI = Math.PI;
   // Ergebnisse, die mit π ≈ 3,14 statt der π-Taste gerechnet wurden, gelten ebenfalls als richtig
   const piTol = x => Math.abs(x) * 0.0006 + 0.011;
@@ -126,7 +126,7 @@
     const x = ri(r, 1, 9), y = ri(r, 1, 8), s = x + y, dd = x - y;
     return { q: `Löse das System und gib x an:  x + y = ${s}  und  x − y = ${f(dd)}`, ans: x, steps: [`Beide Gleichungen addieren: 2x = ${s} + ${sg(dd)} = ${s + dd}`, `x = ${s + dd} : 2 = ${x}`, `y = ${s} − ${x} = ${y}`] };
   });
-  add('m8-kreis', 'mathe', 8, 'Kreis: Umfang & Fläche', r => {
+  add('m8-kreis', 'mathe', 9, 'Kreis: Umfang & Fläche', r => {
     const rad = ri(r, 2, 12), area = r() < 0.5;
     return area ? { q: `Ein Kreis hat den Radius ${rad} cm. Berechne die Fläche (auf 2 Nachkommastellen runden).`, ans: PI * rad * rad, dec: 2, tol: piTol(PI * rad * rad), unit: 'cm²', steps: ['A = π · r²', `A = π · ${rad}² = π · ${rad * rad}`, `A ≈ ${f2(PI * rad * rad)} cm² (mit der π-Taste; mit π ≈ 3,14 sind es ${f2(3.14 * rad * rad)} cm²)`] }
       : { q: `Ein Kreis hat den Radius ${rad} cm. Berechne den Umfang (auf 2 Nachkommastellen runden).`, ans: 2 * PI * rad, dec: 2, tol: piTol(2 * PI * rad), unit: 'cm', steps: ['u = 2 · π · r', `u = 2 · π · ${rad}`, `u ≈ ${f2(2 * PI * rad)} cm (mit der π-Taste; mit π ≈ 3,14 sind es ${f2(2 * 3.14 * rad)} cm)`] };
@@ -263,5 +263,74 @@
   add('c10-ph', 'chemie', 10, 'pH-Wert starker Säuren', r => {
     const k = ri(r, 1, 5);
     return { q: `Berechne den pH-Wert einer starken einprotonigen Säure mit c = 10⁻${sup(k)} mol/L.`, ans: k, steps: ['pH = −lg c(H₃O⁺)', `c(H₃O⁺) = 10⁻${sup(k)} mol/L`, `pH = −lg 10⁻${sup(k)} = ${k}`] };
+  });
+  /* ================= SACHAUFGABEN (Textaufgaben aus dem Alltag) ================= */
+  const S = (id, subject, grade, name, make) => add(id, subject, grade, 'Sachaufgabe: ' + name, make, true);
+  S('m5-einkauf', 'mathe', 5, 'Einkaufen & Rückgeld', r => {
+    const n = ri(r, 2, 5), p = pick(r, [80, 90, 120, 150]), fu = pick(r, [450, 520, 650, 790]), tot = n * p + fu, back = 2000 - tot, kid = pick(r, ['Mia', 'Ben', 'Lea', 'Yusuf']);
+    return { q: `${kid} kauft ${n} Hefte zu je ${f2(p / 100)} € und einen Füller für ${f2(fu / 100)} €. Bezahlt wird mit einem 20-€-Schein. Wie viel Geld gibt es zurück?`, ans: back / 100, unit: '€', show: f2(back / 100), steps: [`Hefte: ${n} · ${f2(p / 100)} € = ${f2(n * p / 100)} €`, `Zusammen: ${f2(n * p / 100)} € + ${f2(fu / 100)} € = ${f2(tot / 100)} €`, `Rückgeld: 20,00 € − ${f2(tot / 100)} € = ${f2(back / 100)} €`] };
+  });
+  S('m5-fahrzeit', 'mathe', 5, 'Fahrzeiten', r => {
+    const h1 = ri(r, 7, 17), m1 = ri(r, 1, 11) * 5, dur = ri(r, 7, 35) * 5, end = h1 * 60 + m1 + dur, h2 = Math.floor(end / 60), m2 = end % 60, z = x => String(x).padStart(2, '0');
+    const toFull = 60 - m1, rest = dur - toFull;
+    return { q: `Ein Zug fährt um ${h1}:${z(m1)} Uhr ab und kommt um ${h2}:${z(m2)} Uhr an. Wie viele Minuten dauert die Fahrt?`, ans: dur, unit: 'min', steps: rest >= 0 ? [`Bis zur vollen Stunde (${h1 + 1}:00 Uhr): ${toFull} min`, `Von ${h1 + 1}:00 Uhr bis ${h2}:${z(m2)} Uhr: ${rest} min`, `Zusammen: ${toFull} min + ${rest} min = ${dur} min`] : ['Beide Zeiten liegen in derselben Stunde.', `${m2} min − ${m1} min = ${dur} min`] };
+  });
+  S('m6-anteil', 'mathe', 6, 'Anteile im Alltag', r => {
+    const b = pick(r, [3, 4, 5, 6]), a = ri(r, 1, b - 1), N = b * ri(r, 3, 6), part = N / b * a, what = pick(r, [['kommen mit dem Fahrrad zur Schule', 'kommen nicht mit dem Fahrrad'], ['spielen ein Instrument', 'spielen kein Instrument'], ['haben ein Haustier', 'haben kein Haustier']]);
+    return { q: `In einer Klasse sind ${N} Kinder. ${a}/${b} davon ${what[0]}. Wie viele Kinder ${what[1]}?`, ans: N - part, unit: 'Kinder', steps: [`${a}/${b} von ${N}: ${N} : ${b} · ${a} = ${part} Kinder`, `Der Rest: ${N} − ${part} = ${N - part} Kinder`, `(Oder direkt: ${b - a}/${b} von ${N} = ${N - part})`] };
+  });
+  S('m6-durchschnitt', 'mathe', 6, 'Durchschnitt berechnen', r => {
+    const v = Array.from({ length: 5 }, () => ri(r, 0, 6)), sum = v.reduce((x, y) => x + y, 0);
+    return { q: `Ein Fußballer hat in fünf Spielen ${v.slice(0, 4).join(', ')} und ${v[4]} Tore geschossen. Wie viele Tore sind das im Durchschnitt pro Spiel?`, ans: sum / 5, unit: 'Tore', steps: [`Alle Werte addieren: ${v.join(' + ')} = ${sum}`, `Durch die Anzahl der Spiele teilen: ${sum} : 5 = ${f(sum / 5)}`] };
+  });
+  S('m7-mwst', 'mathe', 7, 'Mehrwertsteuer', r => {
+    const netto = pick(r, [50, 100, 150, 200, 300, 400, 500, 800]), st = netto * 19 / 100, what = pick(r, ['Ein Fahrrad', 'Ein Tablet', 'Eine Jacke', 'Ein Schreibtisch']);
+    return { q: `${what} kostet ohne Mehrwertsteuer ${netto} €. Dazu kommen 19 % Mehrwertsteuer. Wie hoch ist der Endpreis?`, ans: netto + st, unit: '€', show: f2(netto + st), steps: [`19 % von ${netto} € = ${netto} € · 0,19 = ${f2(st)} €`, `Endpreis: ${netto} € + ${f2(st)} € = ${f2(netto + st)} €`, `(Kurzweg: ${netto} € · 1,19 = ${f2(netto + st)} €)`] };
+  });
+  S('m7-sparen', 'mathe', 7, 'Gleichung aus dem Alltag', r => {
+    const s = ri(r, 2, 12) * 5, w = pick(r, [4, 5, 6, 8, 10]), n = ri(r, 3, 12), Z = s + w * n, kid = pick(r, ['Lena', 'Tom', 'Aylin', 'Jonas']);
+    return { q: `${kid} hat ${s} € gespart und legt jede Woche ${w} € dazu. Nach wie vielen Wochen sind es ${Z} €?`, ans: n, unit: 'Wochen', steps: [`Gleichung aufstellen (x = Anzahl der Wochen): ${s} + ${w} · x = ${Z}`, `${s} abziehen: ${w} · x = ${Z - s}`, `Durch ${w} teilen: x = ${n}`] };
+  });
+  S('m8-tarife', 'mathe', 8, 'Tarife vergleichen', r => {
+    const pB = pick(r, [10, 15, 20, 25]), d = pick(r, [5, 10]), pA = pB + d, x = ri(r, 3, 12), gA = pick(r, [0, 10, 20]), gB = gA + d * x;
+    return { q: `Studio A kostet ${gA} € Anmeldegebühr und ${pA} € pro Monat. Studio B kostet ${gB} € Anmeldegebühr und ${pB} € pro Monat. Nach wie vielen Monaten haben beide gleich viel gekostet?`, ans: x, unit: 'Monate', steps: [`Kosten als Funktionen: A(x) = ${pA}x + ${gA} und B(x) = ${pB}x + ${gB}`, `Gleichsetzen: ${pA}x + ${gA} = ${pB}x + ${gB}`, `${pA - pB}x = ${gB - gA} → x = ${x}`, 'Danach ist Studio B günstiger, davor Studio A.'] };
+  });
+  S('m8-jahreszins', 'mathe', 8, 'Zinsen für ein Jahr', r => {
+    const K = ri(r, 2, 20) * 100, p = pick(r, [1.5, 2, 2.5, 3, 4]), Z = K * p / 100;
+    return { q: `Du legst ${K} € ein Jahr lang zu ${f(p)} % Zinsen an. Wie viele Euro Zinsen bekommst du?`, ans: Z, unit: '€', steps: ['Zinsen = Kapital · Zinssatz', `Z = ${K} € · ${f(p)}/100 = ${K} € · ${f(p / 100)}`, `Z = ${f(Z)} €`] };
+  });
+  S('m9-leiter', 'mathe', 9, 'Pythagoras im Alltag', r => {
+    const [a, h, c] = pick(r, [[3, 4, 5], [1.5, 2, 2.5], [1.8, 2.4, 3], [2.4, 3.2, 4], [2.5, 6, 6.5], [1.4, 4.8, 5]]);
+    return { q: `Eine ${f(c)} m lange Leiter lehnt an einer Hauswand. Ihr Fuß steht ${f(a)} m von der Wand entfernt. In welcher Höhe berührt die Leiter die Wand?`, ans: h, unit: 'm', steps: ['Leiter, Boden und Wand bilden ein rechtwinkliges Dreieck – die Leiter ist die Hypotenuse.', `h² = ${f(c)}² − ${f(a)}² = ${f(c * c)} − ${f(a * a)} = ${f(h * h)}`, `h = √${f(h * h)} = ${f(h)} m`] };
+  });
+  S('m9-wurf', 'mathe', 9, 'Wurfparabel', r => {
+    const a = pick(r, [0.05, 0.1, 0.2, 0.25, 0.5]), w = pick(r, [4, 6, 8, 10, 12, 20]), b = a * w, top = a * w * w / 4, land = r() < 0.5;
+    const term = `h(x) = −${f(a)}x² + ${f(b)}x`;
+    return land ? { q: `Die Flugbahn eines Balls wird durch ${term} beschrieben (x und h in Metern). Nach wie vielen Metern landet der Ball wieder auf dem Boden?`, ans: w, unit: 'm', steps: ['Am Boden ist die Höhe 0: h(x) = 0', `Ausklammern: x · (−${f(a)}x + ${f(b)}) = 0`, `x = 0 (Abwurf) oder x = ${f(b)} : ${f(a)} = ${w}`, `Der Ball landet nach ${w} m.`] }
+      : { q: `Die Flugbahn eines Balls wird durch ${term} beschrieben (x und h in Metern). Wie hoch fliegt der Ball höchstens?`, ans: top, unit: 'm', steps: [`Nullstellen: x = 0 und x = ${w}`, `Der höchste Punkt (Scheitel) liegt genau in der Mitte: x = ${f(w / 2)}`, `h(${f(w / 2)}) = −${f(a)} · ${f(w / 2)}² + ${f(b)} · ${f(w / 2)} = ${f(top)} m`] };
+  });
+  S('m10-turm', 'mathe', 10, 'Höhen bestimmen', r => {
+    const d = ri(r, 2, 12) * 10, al = pick(r, [20, 25, 30, 35, 40, 50, 55, 60]), h = d * Math.tan(al * PI / 180);
+    return { q: `Du stehst ${d} m von einem Turm entfernt und siehst seine Spitze unter einem Höhenwinkel von ${al}°. Wie hoch ist der Turm? (Augenhöhe vernachlässigen, auf 1 Nachkommastelle runden)`, ans: h, dec: 1, tol: 0.06, unit: 'm', steps: ['Entfernung = Ankathete, Turmhöhe = Gegenkathete → Tangens', `tan ${al}° = h : ${d} → h = ${d} · tan ${al}°`, `h ≈ ${d} · ${f(Math.round(Math.tan(al * PI / 180) * 10000) / 10000)} ≈ ${f(Math.round(h * 10) / 10)} m`] };
+  });
+  S('m10-wertverlust', 'mathe', 10, 'Wertverlust (exponentielle Abnahme)', r => {
+    const K = ri(r, 10, 40) * 1000, p = pick(r, [10, 15, 20, 25]), n = ri(r, 2, 4), q = 1 - p / 100, W = K * Math.pow(q, n);
+    return { q: `Ein Auto kostet neu ${K} €. Es verliert jedes Jahr ${p} % seines Wertes. Wie viel ist es nach ${n} Jahren noch wert? (auf ganze Euro runden)`, ans: Math.round(W), tol: 0.6, unit: '€', steps: [`Abnahmefaktor: q = 1 − ${p}/100 = ${f(q)}`, `W = ${K} € · ${f(q)}${sup(n)}`, `W ≈ ${Math.round(W)} €`] };
+  });
+  S('p7-gewitter', 'physik', 7, 'Wie weit ist das Gewitter?', r => {
+    const t = ri(r, 2, 12);
+    return { q: `Du siehst einen Blitz und hörst den Donner ${t} s später. Wie weit ist das Gewitter entfernt? (Schallgeschwindigkeit: 340 m/s)`, ans: 340 * t, unit: 'm', steps: ['Das Licht ist praktisch sofort da – der Schall braucht Zeit.', 's = v · t', `s = 340 m/s · ${t} s = ${340 * t} m`] };
+  });
+  S('p8-stromkosten', 'physik', 8, 'Stromkosten', r => {
+    const P = pick(r, [500, 1000, 1500, 2000, 2500]), h = ri(r, 2, 8), pr = pick(r, [30, 40]), E = P * h / 1000, cost = P * h * pr / 100000, what = pick(r, ['Ein Heizlüfter', 'Ein Backofen', 'Ein Wäschetrockner']);
+    return { q: `${what} mit ${P} W läuft ${h} Stunden. Eine Kilowattstunde kostet ${f2(pr / 100)} €. Wie viel kostet das?`, ans: cost, unit: '€', show: f2(cost), steps: [`Leistung in kW: ${P} W = ${f(P / 1000)} kW`, `Energie: E = P · t = ${f(P / 1000)} kW · ${h} h = ${f(E)} kWh`, `Kosten: ${f(E)} kWh · ${f2(pr / 100)} € = ${f2(cost)} €`] };
+  });
+  S('p9-kran', 'physik', 9, 'Leistung eines Krans', r => {
+    const m = ri(r, 1, 10) * 100, h = ri(r, 2, 15), t = pick(r, [5, 10, 20, 25]), W = m * 10 * h;
+    return { q: `Ein Kran hebt eine Last von ${m} kg in ${t} s um ${h} m an. Welche Leistung bringt er dabei auf? (g = 10 N/kg)`, ans: W / t, unit: 'W', steps: [`Gewichtskraft: F = m · g = ${m} kg · 10 N/kg = ${m * 10} N`, `Hubarbeit: W = F · h = ${m * 10} N · ${h} m = ${W} J`, `Leistung: P = W : t = ${W} J : ${t} s = ${f(W / t)} W`] };
+  });
+  S('c8-ansetzen', 'chemie', 8, 'Lösung ansetzen', r => {
+    const m = pick(r, [100, 200, 250, 400, 500]), w = pick(r, [2, 4, 5, 8, 10, 20]), s = m * w / 100;
+    return { q: `Du brauchst ${m} g einer Salzlösung mit einem Massenanteil von ${w} %. Wie viel Gramm Salz musst du abwiegen?`, ans: s, unit: 'g', steps: ['m(Salz) = Massenanteil · m(Lösung)', `m(Salz) = ${w}/100 · ${m} g = ${f(s)} g`, `Dazu kommen ${f(m - s)} g Wasser.`] };
   });
 })();

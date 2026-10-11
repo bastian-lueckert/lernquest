@@ -11,7 +11,7 @@ window.LERN = {
     { id: 'geschichte', name: 'Geschichte', icon: '🏛️', color: '#a0722a' },
     { id: 'erdkunde', name: 'Erdkunde', icon: '🌍', color: '#1c7ed6' },
     { id: 'informatik', name: 'Informatik', icon: '💻', color: '#495057' },
-    { id: 'politik', name: 'Politik', icon: '🗳️', color: '#c2255c' },
+    { id: 'politik', name: 'Wirtschaft-Politik', icon: '🗳️', color: '#c2255c' },
     { id: 'franzoesisch', name: 'Französisch', icon: '🥐', color: '#364fc7' },
     { id: 'latein', name: 'Latein', icon: '🏺', color: '#862e9c' },
     { id: 'musik', name: 'Musik', icon: '🎵', color: '#f08c00' },

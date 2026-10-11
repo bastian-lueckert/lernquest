@@ -1,7 +1,7 @@
 (() => {
   const P = LERN.P, A = LERN.pairs, term = LERN.T.term;
-  const jahr = { q: 'Wann geschah das: {0}?', qr: 'Was geschah {1}?', e: '{0}: {1}.' };
-  const pers = { q: 'Wer war {0}?', qr: 'Wer ist gemeint: {1}?', e: '{0}: {1}.' };
+  const jahr = { q: 'Wann geschah das: {0}?', qr: 'Was geschah {1}?', e: '{0}: {1}.', ty: 1, order: 'zeit' };
+  const pers = { q: 'Wer war {0}?', qr: 'Wer ist gemeint: {1}?', e: '{0}: {1}.', tm: 'name' };
   const G = (g, id, name, tpl, s) => A('geschichte', g, id, name, tpl, P(s));
 
   /* ---- Klasse 5 ---- */
